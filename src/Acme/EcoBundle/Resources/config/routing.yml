@@ -1,0 +1,108 @@
+acme_eco_bd_create:
+    path:     /db/create
+    defaults: { _controller: AcmeEcoBundle:Default:create }
+
+acme_eco_bd_create_person:
+    path:     /db/create/{familyName}/{name} {surname} {secondname}
+    defaults: { _controller: AcmeEcoBundle:Default:create }
+
+acme_eco_bd_show:
+    path:     /db/show-{id}
+    defaults: { _controller: AcmeEcoBundle:Default:show }
+
+acme_eco_new_family:
+    path:     /newFamily
+    defaults: { _controller: AcmeEcoBundle:Default:newFamily}
+
+acme_eco_new_member:
+    path:     /newMember
+    defaults: { _controller: AcmeEcoBundle:Default:newMember}
+
+acme_eco_registration_member:
+    path:     /registration
+    defaults: { _controller: AcmeEcoBundle:Auth:registration}
+
+acme_eco_auth_member:
+    path:     /auth
+    defaults: { _controller: AcmeEcoBundle:Auth:auth}
+
+
+acme_eco_logout_member:
+    path:     /logout
+    defaults: { _controller: AcmeEcoBundle:Auth:logout }
+
+acme_eco_checkAuth_member:
+    path:     /checkAuth
+    defaults: { _controller: AcmeEcoBundle:Auth:checkAuth }
+
+acme_eco_change_member:
+    path:     /changeMember
+    defaults: { _controller: AcmeEcoBundle:Default:changeMember}
+
+acme_eco_delete_member:
+    path:     /deleteMember
+    defaults: { _controller: AcmeEcoBundle:Default:deleteMember}
+
+acme_eco_list_member:
+    path:     /listMember
+    defaults: { _controller: AcmeEcoBundle:Default:listMember}
+
+acme_eco_show_member:
+    path:     /showMember
+    defaults: { _controller: AcmeEcoBundle:Default:showMember}
+
+acme_eco_new_category:
+    path:     /newCategory
+    defaults: { _controller: AcmeEcoBundle:Transaction:newCategory }
+
+acme_eco_delete_category:
+    path:     /deleteCategory
+    defaults: { _controller: AcmeEcoBundle:Transaction:deleteCategory }
+
+acme_eco_change_category:
+    path:     /changeCategory
+    defaults: { _controller: AcmeEcoBundle:Transaction:changeCategory }
+
+acme_eco_list_category:
+    path:     /listCategory
+    defaults: { _controller: AcmeEcoBundle:Transaction:listCategory}
+
+acme_eco_show_category:
+    path:     /showCategory
+    defaults: { _controller: AcmeEcoBundle:Transaction:showCategory}
+
+acme_eco_show_transaction:
+    path:     /showTransaction
+    defaults: { _controller: AcmeEcoBundle:Transaction:showTransaction}
+
+acme_eco_new_transaction:
+    path:     /newTransaction
+    defaults: { _controller: AcmeEcoBundle:Transaction:newTransaction}
+
+acme_eco_change_transaction:
+    path:     /changeTransaction
+    defaults: { _controller: AcmeEcoBundle:Transaction:changeTransaction}
+
+acme_eco_delete_transaction:
+    path:     /deleteTransaction
+    defaults: { _controller: AcmeEcoBundle:Transaction:deleteTransaction}
+
+acme_eco_list_transaction:
+    path:     /listTransaction
+    defaults: { _controller: AcmeEcoBundle:Transaction:listTransaction}
+
+acme_eco_summ_reports:
+    path:     /summ
+    defaults: { _controller: AcmeEcoBundle:Reports:summ}
+
+acme_eco_summForDates_reports:
+    path:     /summForDates
+    defaults: { _controller: AcmeEcoBundle:Reports:summForDates}
+
+acme_eco_summForEachDay_reports:
+    path:     /summForEachDay
+    defaults: { _controller: AcmeEcoBundle:Reports:summForEachDay}
+
+acme_eco_summByCategory_reports:
+    path:     /summByCategory
+    defaults: { _controller: AcmeEcoBundle:Reports:summByCategory}

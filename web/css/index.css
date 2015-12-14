@@ -1,0 +1,425 @@
+body{
+    padding:0;
+    height:100%;
+    width: 1200px;
+    margin:auto;
+    font-size: 12pt;
+    font-family: 'Segoe UI Emoji';
+}
+p{
+    cursor: default;
+}
+select{
+    min-width:100px;
+}
+.header{
+    position: fixed;
+    height: 50px;
+    width: 1200px;
+    margin: 0 auto;
+    padding:0;
+    background: #D3D3D3;
+}
+.footer{
+    position: relative;
+    height: 70px;
+    width: 1200px;
+    margin: 0 auto;
+    padding:0;
+    background: #D3D3D3;
+    bottom:0;
+}
+.container{
+    position: relative;
+    min-height:1200px;
+    height:100%;
+    padding-top: 60px;
+    width: 1200px;
+    margin: auto;
+}
+
+.str1,.str2 {
+    display: inline-block;
+    font-size: 28pt;
+    margin: 5px 0;
+    padding: 0;
+}
+.login, .reg{
+    color: #ffffff;
+    background: #00abec;
+    position: relative;
+    height:50px;
+    width: 150px;
+    /*padding-top:0;*/
+    margin: 0 100px;
+}
+.hide{
+    display: none;
+}
+.auth{
+    height:140px;
+    width: 350px;
+    /*background: linear-gradient(to top, #fafafa, #f5f5f5);*/
+    position: absolute;
+    /*margin-left: auto;*/
+    /*margin-right: auto;*/
+    top:300px;
+    left:425px;
+    z-index: 999;
+}
+.shirm{
+    position: fixed;
+    top:0;
+    left:0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.8;
+    background-color: black;
+    z-index: 998;
+}
+.showLogin, .newFamily{
+    height:180px;
+    width: 300px;
+    padding: 25px;
+    background: linear-gradient(to top, #fafafa, #f5f5f5);
+    position: absolute;
+    /*margin-left: auto;*/
+    /*margin-right: auto;*/
+    top:300px;
+    left:425px;
+    z-index: 999;
+}
+input{
+    height:30px;
+    width: 300px;
+}
+
+.agreeLogin, .AgreeRegistration, .agreeNewFamily, .agreeNewMember, .agreeChangeMember {
+    color: #ffffff;
+    background: #00abec;
+    position: relative;
+    height:50px;
+    width: 200px;
+    /*padding-top:0;*/
+    margin: 15px 50px;
+}
+.showRegistration, .newMember, .changeMember{
+    height:360px;
+    width: 300px;
+    padding: 25px;
+    background: linear-gradient(to top, #fafafa, #f5f5f5);
+    position: absolute;
+    /*margin-left: auto;*/
+    /*margin-right: auto;*/
+    top:250px;
+    left:425px;
+    z-index: 999;
+}
+a .logo{
+    display: inline-block;
+    position: relative;
+    padding:9px;
+    margin: 0;
+    height: 100%;
+    width: 300px;
+    font-size: 16pt;
+    font-family: 'Segoe UI Semibold';
+    color: #000000;
+    text-decoration: none;
+}
+a{
+    text-decoration: none;
+    color: blue;
+}
+.logOut{
+    position: absolute;
+    padding:13px 0;
+    top:0;
+    right: 25px;
+    font-size: 12pt;
+    font-family: 'Segoe UI Emoji';
+    cursor: pointer;
+}
+.options, .family{
+    position: absolute;
+    padding:13px 0;
+    top:-1px;
+    right: 115px;
+    font-size: 12pt;
+    font-family: 'Segoe UI Emoji';
+    cursor: pointer;
+}
+.familyList{
+    min-width: 250px;
+    width: auto;
+    padding: 0 15px 0 15px;
+    position: absolute;
+    background: lightgray;
+    border-radius: 5px;
+    /*padding:13px 0;*/
+    top:60px;
+    right: 0;
+    font-size: 12pt;
+    font-family: 'Segoe UI Emoji';
+    cursor: pointer;
+    text-align: end;
+}
+.buttonChangeMember, .deleteMember{
+    width: 24px; /* Ширина кнопки */
+    height: 24px; /* Высота кнопки */
+    border: none; /* Убираем рамку */
+}
+.stringOfMemberList{
+    font-size: 12pt;
+    font-family: 'Segoe UI Emoji';
+}
+.buttons{
+    height:13px;
+    width: 13px;
+    border: none;
+    cursor: pointer;
+}
+
+.category{
+    width: 250px;
+    height:130px;
+    padding: 5px 15px 5px 15px;
+    position: relative;
+    background: lightgray;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    /*padding:13px 0;*/
+    top:30px;
+    left: 0;
+    /*font-size: 12pt;*/
+    /*font-family: 'Segoe UI Emoji';*/
+    cursor: pointer;
+    text-align: start;
+    overflow: auto;
+}
+.agreeCategory, .agreeChangeCategory, .agreeChangeTransaction{
+    color: #ffffff;
+    background: #00abec;
+    position: relative;
+    height:36px;
+    width: 240px;
+    top:10px;
+    /*padding-top:0;*/
+    /*margin: 10px 50px;*/
+}
+.categoryList{
+    width: 250px;
+    height:300px;
+    padding: 5px 15px 5px 15px;
+    position: relative;
+    background: lightgray;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    /*padding:13px 0;*/
+    top:30px;
+    left: 0;
+    font-size: 12pt;
+    font-family: 'Segoe UI Emoji';
+    cursor: pointer;
+    text-align: start;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+p.profit{
+    /*width: auto;*/
+    width: 240px;
+    height:30px;
+    padding: 5px 0 5px 0 ;
+    margin: 0;
+    background: lightgreen;
+}
+p.wastage{
+    width: 240px;
+    height:30px;
+    padding: 5px 0 5px 0 ;
+    margin: 0;
+    background: lightcoral;
+}
+tr.wastage{
+    background: lightcoral;
+}
+tr.profit{
+    background: lightgreen;
+}
+th{
+    width: auto;
+}
+.changeCategory, .deleteCategory{
+
+    height: 30px;
+    width: 28px;
+    opacity: 0.9;
+    background: none;
+    border: none;
+    /*bottom:20px;*/
+}
+.transaction{
+    width: 250px;
+    height:190px;
+    padding: 5px 15px 5px 15px;
+    position: relative;
+    background: lightgray;
+    border-radius: 5px;
+    /*padding:13px 0;*/
+    top:0;
+    left:0;
+    /*font-size: 12pt;*/
+    /*font-family: 'Segoe UI Emoji';*/
+    cursor: pointer;
+    text-align: start;
+    overflow: auto;
+}
+.transInput{
+    width: 150px;
+    height: 25px;
+    font-size: 12pt;
+    font-family: 'Segoe UI Emoji';
+}
+.transLabel{
+    display: inline-block;
+    width: 90px;
+    height: 25px;
+    font-size: 12pt;
+    font-family: 'Segoe UI Emoji';
+}
+.agreeTransaction{
+    color: #ffffff;
+    background: #00abec;
+    position: relative;
+    height:36px;
+    width: 240px;
+    top:10px;
+    /*padding-top:0;*/
+    /*margin: 10px 50px;*/
+}
+
+.formChangeCategory{
+    width: 250px;
+    height:100px;
+    padding: 30px;
+    background: linear-gradient(to top, #fafafa, #f5f5f5);
+    position: absolute;
+    /*margin-left: auto;*/
+    /*margin-right: auto;*/
+    top:40%;
+    left:475px;
+    z-index: 999;
+}
+.formChangeTransaction{
+    width: 250px;
+    height:170px;
+    padding: 30px;
+    background: linear-gradient(to top, #fafafa, #f5f5f5);
+    position: absolute;
+    /*margin-left: auto;*/
+    /*margin-right: auto;*/
+    top:40%;
+    left:475px;
+    z-index: 999;
+}
+.transactionList{
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 570px;
+    /*max-height:300px;*/
+    min-height:100px;
+    max-height:350px;
+    padding: 10px;
+    background: linear-gradient(to top, #fafafa, #f5f5f5);
+    position: absolute;
+    top: 370px;
+    left:300px;
+    font-size: 12pt;
+    font-family: 'Segoe UI Emoji';
+}
+
+#transactionTable{
+    width: 550px;
+    min-height:100px;
+    max-height:300px;
+}
+td.tdName{
+    /*min-width:auto;*/
+    width: 250px;
+}
+td.tdDate{
+    width: 90px;
+    padding: 5px;
+}
+td.tdSum{
+    width: 90px;
+    padding: 5px;
+}
+td.tdButton{
+    margin: auto;
+    padding: 0;
+    width:30px;
+}
+
+.report1{
+    position: absolute;
+    display: inline-block;
+    width:230px;
+    padding:15px;
+    height:250px;
+    background: lightgray;
+    border-radius: 5px;
+    left:290px;
+    top:60px
+}
+.report2{
+    height:250px;
+    position: absolute;
+    display: inline-block;
+    width:320px;
+    padding:15px;
+    background: lightgray;
+    border-radius: 5px;
+    top:60px;
+    left:560px;
+}
+.inputDisabled{
+    width:80px;
+    height: 25px;
+    position: absolute;
+    right: 15px;
+}
+
+span{
+    position: relative;
+    width:100px;
+    height:20px;
+    top: 7px;
+}
+#to,#from{
+    width:70px;
+    height: 15px;
+    /*position: absolute;*/
+    /*right: 15px;*/
+}
+.agreeReport1, .agreeReport2{
+    color: #ffffff;
+    background: #00abec;
+    position: relative;
+    height:23px;
+    width: 120px;
+    /*padding-top:0;*/
+    /*margin: 15px 50px;*/
+}
+.pieCharts{
+    position: absolute;
+    bottom:0;
+    left:0;
+    width:auto;
+    height:400px;
+}
+.close{
+    position: absolute;
+    top:5px;
+    right: 5px;
+}
