@@ -27,11 +27,12 @@ $(document).ready(function () {
         }
     }
 
+
     function showContent(){
-        //$('.reports').fadeIn("slow").toggleClass("hide");
-        //$('.transaction').fadeIn("slow").toggleClass("hide");
-        //$('.family').fadeIn("slow").toggleClass("hide");
-        //$('.logOut').fadeIn("slow").toggleClass("hide");
+        //$('.reports').fadeToggle("slow").toggleClass("hide");
+        //$('.transaction').fadeToggle("slow").toggleClass("hide");
+        //$('.family').fadeToggle("slow").toggleClass("hide");
+        //$('.logOut').fadeToggle("slow").toggleClass("hide");
 
     }
 
@@ -61,8 +62,7 @@ $(document).ready(function () {
             success: function (msg) {
                 if (msg == 'Ok!') {
                     $('.showLogin, .shirm, .auth')
-                        .fadeOut("slow")
-                        .toggleClass("hide");
+                        .fadeToggle("slow");
                     loadDB();
                 } else {
                     alert('Неверный логин или пароль!');
@@ -89,14 +89,12 @@ $(document).ready(function () {
                 login: login
             },
             success: function (msg) {
-                console.log(msg);
+                //console.log(msg);
                 if (msg == 'Ok!') {
                     $('.showRegistration, .shirm, .auth')
-                        .fadeOut("slow")
-                        .toggleClass("hide");
+                        .fadeToggle("slow");
                     $('.membersList')
-                        .fadeOut("slow")
-                        .toggleClass("hide");
+                        .fadeToggle("slow");
                     //location.reload()
                 } else {
                     if(msg == 'Login already exist!'){
@@ -111,7 +109,7 @@ $(document).ready(function () {
 
 //  Отображение формы: Создание новой семьи
     $('.buttonNewFamily').on("click", function () {
-        $('.newFamily, .shirm').fadeIn("slow").toggleClass("hide");
+        $('.newFamily, .shirm').fadeToggle("slow");
     });
 
 //  Создание новой семьи
@@ -124,7 +122,7 @@ $(document).ready(function () {
             url: "/web/app_dev.php/newFamily",
             success: function (msg) {
                 if(msg == 'Ok!'){
-                    $('.newFamily, .shirm').fadeOut("slow").toggleClass("hide");
+                    $('.newFamily, .shirm').fadeToggle("slow");
                     showListMember();
                 }else{
                     alert('Некорректное имя семьи');
@@ -136,22 +134,18 @@ $(document).ready(function () {
 
 //  Отобразить форму login
     $('.login').on("click", function () {
-        $('.showLogin').fadeIn("slow");
-        $('.showLogin').toggleClass("hide")
+        $('.showLogin').fadeToggle("slow");
     });
 
 //  Отобразить форму registration
     $('.reg').on("click", function () {
-        $('.showRegistration').fadeIn("slow");
-        $('.showRegistration').toggleClass("hide")
+        $('.showRegistration').fadeToggle("slow");
     });
 
 
 //  Отображение формы: Создание нового члена семьи
     $('.buttonNewMember').on("click", function () {
-        $('.newMember').fadeIn("slow");
-        $('.newMember').toggleClass("hide");
-        $('.shirm').toggleClass("hide");
+        $('.newMember, .shirm').fadeToggle("slow");
     });
 
 //  Создание нового члена семьи
@@ -164,14 +158,18 @@ $(document).ready(function () {
         $.ajax({
             type: "POST",
             url: "/web/app_dev.php/newMember",
-//                traditional: true,
-            data: {name: name, surname: surname, secondname: secondname, password: password, login: login},
+            data: {
+                name: name,
+                surname: surname,
+                secondname: secondname,
+                password: password,
+                login: login
+            },
             success: function (msg) {
-                console.log(msg);
+                //console.log(msg);
                 if (msg == 'Ok!') {
                     $('.newMember, .shirm')
-                        .fadeOut("slow")
-                        .toggleClass("hide");
+                        .fadeToggle("slow");
                     $('.membersList').html('');
                     showListMember();
                 } else {
@@ -191,32 +189,46 @@ $(document).ready(function () {
             type: "get",
             url: "/web/app_dev.php/listMember",
             success: function (msg) {
-
                 var familyId = getCookie('familyId');
+                //console.log(msg);
+
+                //  Обнулим все списки членов семьи
+                $('.membersList, .chooseMember, .chooseMember1, .chooseMember2').html('');
+
+                //  Заполнение выпадающих списков, первой опицей ставится семья,
+                // если она есть у пользователя
                 if (familyId) {
                     $('.chooseMember, .chooseMember1, .chooseMember2')
-                        .append('<option selected value="familyId=' + familyId + '">Семья</option>');
+                        .append(
+                            '<option selected value="familyId=' + familyId + '">Семья' +
+                            '</option>'
+                        );
                 }
+
+                //  Заполнение выпадающего списка
                 if(msg)jQuery.parseJSON(msg).forEach(function (val, i) {
+                    $('.chooseMember, .chooseMember1, .chooseMember2')
+                        .append(
+                            '<option value="memberId=' + val.memberId + '">'+val.name+''+
+                            '</option>'
+                        );
 
-                    if (familyId) {
-                        $('.chooseMember, .chooseMember1, .chooseMember2')
-                            .append('<option value="memberId=' + val.memberId + '">' + val.name + '</option>');
-                    }
-
-                    $('.membersList').append('' +
-                        '<p class="stringOfMemberList" >'
-                        + val.surname + ' ' + val.name + ' ' + val.secondname + ' ' +
-                        '<button name="' + val.memberId + '" class="buttonChangeMember">' +
-                        '<img class="buttons" src="/web/bundles/acmeeco/images/Pencil-24.png"/>' +
-                        '</button> ' +
-                        '<button name="' + val.memberId + '" class="deleteMember">' +
-                        '<img class="buttons" src="/web/bundles/acmeeco/images/Delete-24.png"/>' +
-                        '</button>' +
-                        '</p>');
+                //  Заполнение списка в таблице memberList
+                //  она располагается в правом верхнем углу экрана и отображает всех членов семьи
+                    $('.membersList')
+                        .append(
+                            '<p class="stringOfMemberList" >'
+                            + val.surname + ' ' + val.name + ' ' + val.secondname + ' ' +
+                            '<button name="' + val.memberId + '" class="buttonChangeMember">' +
+                            '<img class="buttons" src="/web/images/Pencil-24.png"/>' +
+                            '</button> ' +
+                            '<button name="' + val.memberId + '" class="deleteMember">' +
+                            '<img class="buttons" src="/web/images/Delete-24.png"/>' +
+                            '</button>' +
+                            '</p>'
+                        );
 
                 });
-                //$('.membersList').fadeIn("slow").toggleClass("hide");
             }
         });
     }
@@ -234,8 +246,10 @@ $(document).ready(function () {
                 data: {memberId: memberId},
                 url: "/web/app_dev.php/deleteMember",
                 success: function (msg) {
-                    if(getCookie('memberId')==memberId){location.reload()}
                     stringMember.remove();
+                    if(msg == 'Bye!'){location.reload();}
+                    //if(getCookie('memberId')==memberId){location.reload()}
+
                 }
             });
         }
@@ -244,11 +258,6 @@ $(document).ready(function () {
 //  Изменение личных данных члена семьи
     $('.membersList').on("click", " .buttonChangeMember", function (event) {
         var memberId = $(event.target).closest('button.buttonChangeMember')[0].name;
-        var surname;
-        var name;
-        var secondname;
-        var password;
-        var login;
 
         $.ajax({
             type: "POST",
@@ -257,20 +266,13 @@ $(document).ready(function () {
             success: function (msg) {
                 //console.log(msg);
                 $('.changeMember, .shirm')
-                    .fadeOut("slow")
-                    .toggleClass("hide");
+                    .fadeToggle("slow");
 
                 jQuery.parseJSON(msg).forEach(function (val, i) {
-                    surname = val.surname;
-                    $('#form_surname5').val(surname);
-                    name = val.name;
-                    $('#form_name5').val(name);
-                    secondname = val.secondname;
-                    $('#form_secondname5').val(secondname);
-                    password = val.password;
-                    $('#form_password5').val(password);
-                    login = val.login;
-                    $('#form_login5').val(login);
+                    $('#form_surname5').val(val.surname);
+                    $('#form_name5').val(val.name);
+                    $('#form_secondname5').val(val.secondname);
+                    $('#form_login5').val(val.login);
                 });
 
                 $('.agreeChangeMember').on("click", function () {
@@ -290,27 +292,19 @@ $(document).ready(function () {
                             password: password
                         },
                         url: "/web/app_dev.php/changeMember",
-                        success: function () {
-                            $('.changeMember, .shirm')
-                                .toggleClass("hide");
+                        success: function (msg) {
+                            if(msg == 'Ok!'){
+                                showListMember();
+                                $('.changeMember, .shirm').fadeToggle('slow');
+                            }else{
+                                alert('Некорректные данные!');
+                            }
                         }
                     });
                 });
-
             }
         });
 
-    });
-
-
-//  добавим jquery ui calendar
-    $(function () {
-        $("#datepickerTransaction, #datepickerchangeTransaction").datepicker({
-            dateFormat: 'yy-mm-dd'
-        });
-        //$( "#format" ).change(function() {
-        //    $( "#datepickerTransaction" ).datepicker( "option", "dateFormat", $( this ).val() );
-        //});
     });
 
 //  Добавляем новую транзакцию
@@ -318,15 +312,13 @@ $(document).ready(function () {
         var transactionName = $('#form_transaction').val();
         var transactionType = $('#form_typeTransaction').val();
         var sum = $('#form_sumTransaction').val();
-        //var date = $( "#datepickerTransaction" ).datepicker("getDate");
         var date = $('#datepickerTransaction').val();
         var memberId = getCookie('memberId');
         var familyId = getCookie('familyId');
-        //console.log(transactionName,transactionType,sum,date,memberId,familyId);
+
         $.ajax({
             type: "POST",
             url: "/web/app_dev.php/newTransaction",
-//                traditional: true,
             data: {
                 transactionName: transactionName,
                 transactionType: transactionType,
@@ -336,15 +328,11 @@ $(document).ready(function () {
                 familyId: familyId
             },
             success: function (msg) {
-
-
-                //if(msg == 'Ok!'){
-                //    $('.newMember, .shirm, .auth')
-                //        .fadeOut("slow")
-                //        .toggleClass("hide");
-                //}else{
-                //    //alert('Такой логин уже существует!');
-                //}
+                if(msg == 'Ok!'){
+                    showListTransaction()
+                }else{
+                    alert('Некорректные данные!');
+                }
             }
         });
     });
@@ -361,15 +349,15 @@ $(document).ready(function () {
 //                traditional: true,
             data: {categoryName: categoryName, categoryType: categoryType, memberId: memberId, familyId: familyId},
             success: function (msg) {
-
-
-                //if(msg == 'Ok!'){
-                //    $('.newMember, .shirm, .auth')
-                //        .fadeOut("slow")
-                //        .toggleClass("hide");
-                //}else{
-                //    //alert('Такой логин уже существует!');
-                //}
+                if(msg == 'Ok!'){
+                    showListCategory();
+                }else{
+                    if(msg == 'Bad inputs!'){
+                        alert('Некооректные данные!');
+                    }else{
+                        alert('Такая категория уже существует!');
+                    }
+                }
             }
         });
     });
@@ -384,11 +372,11 @@ $(document).ready(function () {
             url: "/web/app_dev.php/listCategory",
             success: function (msg) {
                 //console.log(msg);
+                $('.categoryList, #Categories').html('');
                 if(msg)jQuery.parseJSON(msg).forEach(function (val, i) {
-                    $('.categoryList').append('<p data-id="' + val.categoryId + '" data-categoryName="' + val.categoryName + '" data-categoryType="' + val.categoryType + '" data-familyId="' + val.familyId + '" data-memberId="' + val.memberId + '" class="' + val.categoryType + '"><button data-id="' + val.categoryId + '" class="deleteCategory"><img class="buttons" src="/web/bundles/acmeeco/images/Delete-24.png"></button><button data-id="' + val.categoryId + '" class="changeCategory"><img class="buttons" src="/web/bundles/acmeeco/images/Pencil-24.png"></button>  ' + val.categoryName + '</p>');
+                    $('.categoryList').append('<p data-id="' + val.categoryId + '" data-categoryName="' + val.categoryName + '" data-categoryType="' + val.categoryType + '" data-familyId="' + val.familyId + '" data-memberId="' + val.memberId + '" class="' + val.categoryType + '"><button data-id="' + val.categoryId + '" class="deleteCategory"><img class="buttons" src="/web/images/Delete-24.png"></button><button data-id="' + val.categoryId + '" class="changeCategory"><img class="buttons" src="/web/images/Pencil-24.png"></button>  ' + val.categoryName + '</p>');
                     $('#Categories').append('<option>' + val.categoryName + '</option>');
                 });
-                //$('.categoryList, .category').fadeIn("slow").toggleClass("hide");
             }
         });
 
@@ -398,7 +386,7 @@ $(document).ready(function () {
     $('.categoryList').on("click", " .deleteCategory", function (event) {
         var categoryId = $(event.target).closest('button.deleteCategory').data('id');
         var stringCategory = $(event.target).closest('p');
-        console.log($(event.target).closest('button.deleteCategory'));
+        //console.log($(event.target).closest('button.deleteCategory'));
         $.ajax({
             type: "POST",
             data: {categoryId: categoryId},
@@ -413,18 +401,15 @@ $(document).ready(function () {
 
 //  Изменение категории
     $('.categoryList').on("click", " .changeCategory", function (event) {
-        $('.formChangeCategory').fadeIn("slow");
-        $('.formChangeCategory').toggleClass("hide");
-        //$('.shirm').toggleClass("hide");
+        $('.formChangeCategory, .shirm').fadeToggle("slow");
         var categoryId = $(event.target).closest('button.changeCategory').data('id');
-        //var stringCategory = $(event.target).closest('p');
-        console.log($(event.target).closest('button.changeCategory'));
+        //console.log($(event.target).closest('button.changeCategory'));
         $.ajax({
             type: "POST",
             data: {categoryId: categoryId},
             url: "/web/app_dev.php/showCategory",
             success: function (msg) {
-                console.log(jQuery.parseJSON(msg)[0]);
+                //console.log(jQuery.parseJSON(msg)[0]);
                 $('#form_changeCategory').val(jQuery.parseJSON(msg)[0].categoryName);
                 $('#form_typechangeCategory').val(jQuery.parseJSON(msg)[0].categoryType);
                 $('.agreeChangeCategory').on("click", function () {
@@ -435,7 +420,6 @@ $(document).ready(function () {
                     $.ajax({
                         type: "POST",
                         url: "/web/app_dev.php/changeCategory",
-//                traditional: true,
                         data: {
                             categoryName: categoryName,
                             categoryType: categoryType,
@@ -445,11 +429,11 @@ $(document).ready(function () {
                         },
                         success: function (msg) {
                             if (msg == 'Ok!') {
-                                $('.formChangeCategory')
-                                    .fadeOut("slow")
-                                    .toggleClass("hide");
+                                $('.formChangeCategory,.shirm')
+                                    .fadeToggle("slow");
+                                showListCategory();
                             } else {
-                                //alert('Такой логин уже существует!');
+                                alert('Некорректные данные!');
                             }
                         }
                     });
@@ -459,21 +443,11 @@ $(document).ready(function () {
     });
 
 //  Отображение списка транзакций пользователя
-    function showListTransaction(who, id) {
-        if (who == 'memberId') {
-            var familyId = getCookie('familyId');
-            var memberId = id;
-        } else {
-            var familyId = getCookie('familyId');
-            var memberId = null;
-        }
-
-        var data = {memberId: memberId, familyId: familyId};
-
-        //var familyId = null;
+    function showListTransaction(params)
+    {
         $.ajax({
             type: "POST",
-            data: {memberId: memberId, familyId: familyId},
+            data: params,
             url: "/web/app_dev.php/listTransaction",
             beforeSend: function () {
                 $('#transactionBody').html('')
@@ -482,9 +456,9 @@ $(document).ready(function () {
                 if (msg) {
                     if(msg)jQuery.parseJSON(msg).forEach(function (val, i) {
                         //console.log(val.date.date);
-                        $('#transactionBody').append('<tr class="' + val.transactionType + '" data-id="' + val.memberId + '"><td class="tdName">' + val.transactionName + '</td><td class="tdSum">' + val.sum + '</td><td class="tdDate">' + val.date.date.substring(10, -10) + '</td><td class="tdButton"><button data-id="' + val.transactionId + '" class="changeTransaction"><img class="buttons" src="/web/bundles/acmeeco/images/Pencil-24.png"></button></td><td class="tdButton"><button data-id="' + val.transactionId + '" class="deleteTransaction"><img class="buttons" src="/web/bundles/acmeeco/images/Delete-24.png"></button></td></tr>');
+                        $('#transactionBody').append('<tr class="' + val.transactionType + '" data-id="' + val.memberId + '"><td class="tdName">' + val.transactionName + '</td><td class="tdSum">' + val.sum + '</td><td class="tdDate">' + val.date.date.substring(10, -10) + '</td><td class="tdButton"><button data-id="' + val.transactionId + '" class="changeTransaction"><img class="buttons" src="/web/images/Pencil-24.png"></button></td><td class="tdButton"><button data-id="' + val.transactionId + '" class="deleteTransaction"><img class="buttons" src="/web/images/Delete-24.png"></button></td></tr>');
                     });
-                    //$('.transactionList').fadeIn("slow").toggleClass("hide");
+                    //$('.transactionList').fadeToggle("slow").toggleClass("hide");
                 } else {
                     $('#transactionBody').append('<tr><td>У пользователя пока нет записей.</td><td></td><td></td><td></td><td></td></tr>');
                 }
@@ -492,13 +466,14 @@ $(document).ready(function () {
         });
     }
 
+    //  Выбор в выпадающем списке "для кого" выводить список транзакций
     $('.chooseMember').on("input", function (event) {
         var arr = $('.chooseMember').val().split(/=/);
-        var who = arr[0];
-        var id = arr[1];
-        console.log(id[0], id[1],$('.chooseMember option:selected').text());
+        var params={};
+        params[arr[0]] = arr[1];
+        showListTransaction(params);
+        //console.log(params,$('.chooseMember option:selected').text());
 
-        //showListTransaction(who, id);
     });
 
 
@@ -520,23 +495,25 @@ $(document).ready(function () {
 
 //  Изменение транзакции
     $('.transactionList').on("click", " .changeTransaction", function (event) {
-        $('.formChangeTransaction').fadeIn("slow");
-        $('.formChangeTransaction').toggleClass("hide");
+        $('.formChangeTransaction, .shirm').fadeToggle("slow");
+        //$('.formChangeTransaction').toggleClass("hide");
         //$('.shirm').toggleClass("hide");
         var transactionId = $(event.target).closest('button.changeTransaction').data('id');
         //var stringCategory = $(event.target).closest('p');
-        console.log($(event.target).closest('button.changeTransaction'));
+        //console.log($(event.target).closest('button.changeTransaction'));
         $.ajax({
             type: "POST",
             data: {transactionId: transactionId},
             url: "/web/app_dev.php/showTransaction",
             success: function (msg) {
-                console.log(jQuery.parseJSON(msg)[0]);
+                //console.log(jQuery.parseJSON(msg)[0]);
                 jQuery.parseJSON(msg).forEach(function (val, i) {
                     $('#form_changeTransaction').val(val.transactionName);
                     $('#form_typechangeTransaction').val(val.transactionType);
                     $('#form_sumchangeTransaction').val(val.sum);
                     $('#datepickerchangeTransaction').val(val.date.date.substring(10, -10));
+                    var memberId = val.memberId;
+
                     $('.agreeChangeTransaction').on("click", function () {
                         var transactionName = $('#form_changeTransaction').val();
                         var transactionType = $('#form_typechangeTransaction').val();
@@ -547,8 +524,8 @@ $(document).ready(function () {
                         $.ajax({
                             type: "POST",
                             url: "/web/app_dev.php/changeTransaction",
-//                traditional: true,
                             data: {
+                                memberId: memberId,
                                 transactionId: transactionId,
                                 transactionName: transactionName,
                                 transactionType: transactionType,
@@ -557,11 +534,12 @@ $(document).ready(function () {
                             },
                             success: function (msg) {
                                 if (msg == 'Ok!') {
-                                    $('.formChangeTransaction')
-                                        .fadeOut("slow")
-                                        .toggleClass("hide");
+                                    $('.formChangeTransaction, .shirm')
+                                        .fadeToggle("slow");
+                                        //.toggleClass("hide");
+                                    showListTransaction();
                                 } else {
-                                    //alert('Такой логин уже существует!');
+                                    alert('Некорректные данные!');
                                 }
                             }
                         });
@@ -569,6 +547,14 @@ $(document).ready(function () {
                 });
 
             }
+        });
+    });
+
+
+//  добавим jquery ui calendar
+    $(function () {
+        $("#datepickerTransaction, #datepickerchangeTransaction").datepicker({
+            dateFormat: 'yy-mm-dd'
         });
     });
 
@@ -602,16 +588,18 @@ $(document).ready(function () {
 
 //  Получаем первый отчет за все время
     $('.agreeReport1').on("click", function () {
-        var arr = $('.chooseMember1').val().split(/=/);
-        var who = arr[0];
-        var id = arr[1];
         var target = $('.chooseMember1 option:selected').text();
+
+        var arr = $('.chooseMember1').val().split(/=/);
+        var params={};
+        params[arr[0]] = arr[1];
+
         $.ajax({
             type: "POST",
-            data: {who: who, id: id},
+            data: params,
             url: "/web/app_dev.php/summ",
             success: function (msg) {
-                console.log(msg,target);
+                //console.log(msg,target);
                 val = jQuery.parseJSON(msg);
                 $('#showWastage1').val(val.summWastage);
                 $('#showProfit1').val(val.summProfit);
@@ -638,23 +626,23 @@ $(document).ready(function () {
 //  Получаем второй отчет за промежуток времени указанный пользователем
     $('.agreeReport2').on("click", function () {
         var arr = $('.chooseMember2').val().split(/=/);
-        var who = arr[0];
-        var id = arr[1];
-        var dateFrom = $('#from').val();
-        var dateTo = $('#to').val();
+        var params={};
+        params[arr[0]] = arr[1];
+        params['dateFrom'] = $('#from').val();
+        params['dateTo'] = $('#to').val();
         var target = $('.chooseMember2 option:selected').text();
+        console.log(params);
         $.ajax({
             type: "POST",
-            data: {who: who, id: id, dateFrom: dateFrom, dateTo: dateTo},
+            data: params,
             url: "/web/app_dev.php/summForDates",
             success: function (msg) {
-                console.log(who, id, dateFrom, dateTo);
                 val = jQuery.parseJSON(msg);
                 $('#showWastage2').val(val.summWastageForDates);
                 $('#showProfit2').val(val.summProfitForDates);
                 $('#showEqual2').val(val.equal);
                 //  Строим график
-                headerPieChart = 'Суммарный отчет для "'+target+'" c '+dateFrom+' по '+dateTo;
+                headerPieChart = 'Суммарный отчет для "'+target+'" c '+params.dateFrom+' по '+params.dateTo;
                 container = '#container2';
                 data2 = [{
                     name: 'Расходы',
@@ -673,25 +661,20 @@ $(document).ready(function () {
 
 //  Получаем третий отчет за каждый день указанного промежутка времени
     $('.agreeReport3').on("click", function () {
-        var arr = $('.chooseMember2').val().split(/=/);
-        var who = arr[0];
-        var id = arr[1];
-        var dateFrom = $('#from').val();
-        var dateTo = $('#to').val();
+        var arr = $('.chooseMember3').val().split(/=/);
+        var params={};
+        params[arr[0]] = arr[1];
+        params['dateFrom'] = $('#from').val();
+        params['dateTo'] = $('#to').val();
         $.ajax({
             type: "POST",
-            data: {who: who, id: id, dateFrom: dateFrom, dateTo: dateTo},
+            data: params,
             url: "/web/app_dev.php/summForEachDay",
             success: function (msg) {
                 var arr = msg.split(/~/);
                 var wastage = arr[0];
                 var profit = arr[1];
-                console.log(jQuery.parseJSON(wastage));
-
-                //val = jQuery.parseJSON(wastage).forEach(function(val, i){
-                //    console.log(val);
-                //    $('.reports').append('<p>'+val.date.date.substring(10, -10)+'= '+val.sum+'</p>');
-                //});
+                //console.log(jQuery.parseJSON(wastage));
 
                 for (i = 0; i < count(jQuery.parseJSON(wastage)); i++) {
                     $('.reports').append('<p>' + wastage[i].date.date.substring(10, -10) + '= ' + wastage[i].sum + '</p>');
@@ -702,12 +685,13 @@ $(document).ready(function () {
     });
 
 
-
+    //  Создание круговой диаграммы из выбранных категорий.
+    // Отображает отношение бюджета между выбранными категориями
     $('.categoryList ').on("click"," .wastage, .profit", function(event){
         //var categoryName = $(event.target).each(function(i,val){console.log(val);});
         var categoryName = $(event.target).closest("p").attr('data-categoryname');
         var transactionType = $(event.target).closest("p").attr('data-categoryType');
-        console.log(categoryName,transactionType);
+        //console.log(categoryName,transactionType);
         $.ajax({
             type: "POST",
             data: {categoryName:categoryName,transactionType:transactionType},
@@ -731,7 +715,7 @@ $(document).ready(function () {
 
 
 
-
+    //  Функция создания круговых диаграм Highcharts.com (c)
     function go(container, headerPieChart, data) {
 
             // Build the chart
@@ -767,5 +751,15 @@ $(document).ready(function () {
     }
     $('.family').on("click", function(){$('.familyList').fadeToggle('slow')});
 
+    //  Кнопка скрытия popup-окошка
+    $('.close').on('click', function(event){
+        $(event.target).closest('div').fadeToggle('slow');
+        $('.shirm').fadeToggle('slow');
+    });
+    //  Особый случай для авторизации, при закрытии окошка Login
+    // или Registration ширма не должна исчезать
+    $('.close2').on('click', function(event){
+        $(event.target).closest('div').fadeToggle('slow');
+    });
 
 });

@@ -3,24 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <script type="text/javascript"  src="/web/bundles/acmeeco/js/jquery-2.1.4.js"></script>
-    <script type="text/javascript"  src="/web/bundles/acmeeco/js/jquery-ui.min.js"></script>
-    <script type="text/javascript"  src="/web/bundles/acmeeco/js/index.js"></script>
-    <script type="text/javascript"  src="/web/bundles/acmeeco/js/highcharts.js"></script>
-    <script type="text/javascript"  src="/web/bundles/acmeeco/js/exporting.js"></script>
-    <link rel="stylesheet"  href="/web/bundles/acmeeco/css/index.css">
-    <link rel="stylesheet"  href="/web/bundles/acmeeco/css/jquery-ui.min.css">
+    <script type="text/javascript"  src="/web/js/jquery-2.1.4.js"></script>
+    <script type="text/javascript"  src="/web/js/jquery-ui.min.js"></script>
+    <script type="text/javascript"  src="/web/js/index.js"></script>
+    <script type="text/javascript"  src="/web/js/highcharts.js"></script>
+    <script type="text/javascript"  src="/web/js/exporting.js"></script>
+    <link rel="stylesheet"  href="/web/css/index.css">
+    <link rel="stylesheet"  href="/web/css/jquery-ui.min.css">
 </head>
 <body>
 <style type="text/css">
     ${demo.css}
 </style>
 <div class="header" style="z-index: 10">
-<!--    <a href="#"><div class="logo">Planning household budget</div></a>-->
-
-
-
-
     <div class="logOut "><a href="http://127.0.0.1/web/app_dev.php/logout">Выйти</a></div>
 
     <div class="family ">Семья</div>
@@ -40,11 +35,7 @@
         <div>
             <label class="transLabel" for="form_transaction" >Категория</label>
             <input class="transInput" type="text" id="form_transaction" name="form[transaction]" required="required" list="Categories">
-            <datalist id="Categories">
-                <option>Покупка еды</option>
-                <option>Заработная плата</option>
-                <option>Долг</option>
-            </datalist>
+            <datalist id="Categories"></datalist>
         </div>
         <div>
             <label class="transLabel" for="form_typeTransaction" >Тип</label>
@@ -90,6 +81,7 @@
     </div>
 
     <div class="newFamily hide">
+        <button class="close">X</button>
         <strong>Создание семьи</strong>
             <div id="form">
                 <div>
@@ -101,18 +93,19 @@
     </div>
 
     <div class="newMember hide">
+        <button class="close">X</button>
         <strong>Создание члена семьи</strong>
             <div id="form">
                 <div>
-                    <label for="form_surname4" class="required">Surname</label>
+                    <label for="form_surname4" class="required">Фамилия</label>
                     <input type="text" id="form_surname4" name="form[surname]" required="required">
                 </div>
                 <div>
-                    <label for="form_name4" class="required">Name</label>
+                    <label for="form_name4" class="required">Имя</label>
                     <input type="text" id="form_name4" name="form[name]" required="required">
                 </div>
                 <div>
-                    <label for="form_secondname4" class="required">Secondname</label>
+                    <label for="form_secondname4" class="required">Отчество</label>
                     <input type="text" id="form_secondname4" name="form[secondname]" required="required">
                 </div>
                 <div>
@@ -128,18 +121,19 @@
     </div>
 
     <div class="changeMember hide">
+        <button class="close">X</button>
         <strong>Изменение </strong>
             <div id="form">
                 <div>
-                    <label for="form_surname5" class="required">Surname</label>
+                    <label for="form_surname5" class="required">Фамилия</label>
                     <input type="text" id="form_surname5" name="form[surname]" required="required">
                 </div>
                 <div>
-                    <label for="form_name4" class="required">Name</label>
+                    <label for="form_name4" class="required">Имя</label>
                     <input type="text" id="form_name5" name="form[name]" required="required">
                 </div>
                 <div>
-                    <label for="form_secondname4" class="required">Secondname</label>
+                    <label for="form_secondname4" class="required">Отчество</label>
                     <input type="text" id="form_secondname5" name="form[secondname]" required="required">
                 </div>
                 <div>
@@ -156,6 +150,7 @@
 
 
     <div class="showLogin hide">
+        <button class="close2">X</button>
         <strong>Авторизация</strong>
         <div id="form">
             <div>
@@ -171,19 +166,19 @@
     </div>
 
     <div class="showRegistration hide">
-        <button class="close">X</button>
+        <button class="close2">X</button>
         <strong>Регистрация</strong>
             <div id="form">
                 <div>
-                    <label for="form_surname" class="required">Surname</label>
+                    <label for="form_surname" class="required">Фамилия</label>
                     <input type="text" id="form_surname" name="form[surname]" required="required">
                 </div>
                 <div>
-                    <label for="form_name" class="required">Name</label>
+                    <label for="form_name" class="required">Имя</label>
                     <input type="text" id="form_name" name="form[name]" required="required">
                 </div>
                 <div>
-                    <label for="form_secondname" class="required">Secondname</label>
+                    <label for="form_secondname" class="required">Отчество</label>
                     <input type="text" id="form_secondname" name="form[secondname]" required="required">
                 </div>
                 <div>
@@ -195,10 +190,11 @@
                     <input type="text" id="form_password2" name="form[password]" required="required">
                 </div>
             </div>
-            <button class="AgreeRegistration">Зарегестрировать</button>
+            <button class="AgreeRegistration">Зарегистрировать</button>
     </div>
 
     <div class="formChangeCategory hide">
+        <button class="close">X</button>
         <div>
             <label class="transLabel" for="form_changeCategory" >Категория</label>
             <input class="transInput" type="text" id="form_changeCategory" name="form[changeCategory]" required="required">
@@ -214,10 +210,11 @@
     </div>
 
     <div class="formChangeTransaction hide">
+        <button class="close">X</button>
         <div>
             <label class="transLabel" for="form_changeTransaction" >Категория</label>
             <input class="transInput" type="text" id="form_changeTransaction" name="form[changeTransaction]" required="required" list="Categories">
-            <datalist id="Categories">
+            <datalist class="datalistCategories" id="Categories">
                 <option>Покупка еды</option>
                 <option>Заработная плата</option>
                 <option>Долг</option>
@@ -272,11 +269,6 @@
             <strong>Общая ведомость расходов и доходов</strong>
             <select class="chooseMember" id="">
             </select>
-            <!--            <select class="chooseType" id="">-->
-            <!--                <option selected value="all">Все транзакции</option>-->
-            <!--                <option value="profit">Только доход</option>-->
-            <!--                <option value="wastage">Только рaсход</option>-->
-            <!--            </select>-->
         </header>
         <table id="transactionTable" class="tablesorter">
             <thead>
@@ -304,71 +296,11 @@
 
 
 <div class="footer">
-    <a href=""><div>Homepage</div></a>   <a href=""><div>Git</div></a>
-</div>
-<!--<h1>Wellcome!!!</h1>-->
-<!--<div>//После регистрации юзер сразу авторизуется=ему присваивается membId(его идентификатор в бд) => следовательно<br>-->
-<!--    необходимо скрыть кнопки авторизация и регистрация и вывести кнопку разлогиниться.<br>-->
-<!--    <a href="http://127.0.0.1/web/app_dev.php/unlogin"><button>Разлогиниться</button></a>-->
-<!--    <a href="http://127.0.0.1/web/app_dev.php/reg"><button>Регистрация</button></a>-->
-<!--    <a href="http://127.0.0.1/web/app_dev.php/auth"><button>Авторизация</button></a>-->
-<!--</div>-->
-<!--<div>//Если fmID есть в сессии то спрятать кнопку Зарегать семью и показать зарегать членов семьи и наоборот <br>-->
-<!--    <a href="http://127.0.0.1/web/app_dev.php/new_family"><button>Зарегистрировать семью</button></a>-->
-<!--    <a href="http://127.0.0.1/web/app_dev.php/new_member"><button>Зарегистрировать члена семьи</button></a>-->
-<!--    <a href="http://127.0.0.1/web/app_dev.php/change"><button>Редактировать свой профиль</button></a>-->
-<!--    <a href="http://127.0.0.1/web/app_dev.php/delete"><button>Удалить свой профиль</button></a>-->
-<!--</div>-->
-<!--<div>// Каждой категории присваивается familyId из сессии пользователя => Скрыть кнопку, если нет переменной в сесси <br>-->
-<!--    <a href="http://127.0.0.1/web/app_dev.php/newCategory"><button>Добавить категорию транзакции</button></a>-->
-<!--</div>-->
+    <div class="email">Все вопросы вы можете задать по почте <a>ItmSapce@gmail.com</a></div>
+<!--    <div class="homepage"><a href="">Homepage</a></div>-->
+    <div class="git"><a href="https://github.com/Entreaty/eco">Git</a></div>
 
-<!--<script type="text/javascript">-->
-<!--    $(function () {-->
-<!---->
-<!--        $(document).ready(function () {-->
-<!---->
-<!--            // Build the chart-->
-<!--            $('#container2').highcharts({-->
-<!--                chart: {-->
-<!--                    plotBackgroundColor: null,-->
-<!--                    plotBorderWidth: null,-->
-<!--                    plotShadow: false,-->
-<!--                    type: 'pie'-->
-<!--                },-->
-<!--                title: {-->
-<!--                    text: 'Полный отчет'-->
-<!--                },-->
-<!--                tooltip: {-->
-<!--                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'-->
-<!--                },-->
-<!--                plotOptions: {-->
-<!--                    pie: {-->
-<!--                        allowPointSelect: true,-->
-<!--                        cursor: 'pointer',-->
-<!--                        dataLabels: {-->
-<!--                            enabled: false-->
-<!--                        },-->
-<!--                        showInLegend: true-->
-<!--                    }-->
-<!--                },-->
-<!--                series: [{-->
-<!--                    name: 'Brands',-->
-<!--                    colorByPoint: true,-->
-<!--                    data: [{-->
-<!--                        name: 'Расход',-->
-<!--                        y: 46700,-->
-<!--                        color:'lightcoral'-->
-<!--                    }, {-->
-<!--                        name: 'Доход',-->
-<!--                        y: 70000,-->
-<!--                        color:'lightgreen'-->
-<!--                    }]-->
-<!--                }]-->
-<!--            });-->
-<!--        });-->
-<!--    });-->
-<!--</script>-->
+</div>
 
 
 </body>

@@ -3,8 +3,6 @@ namespace Acme\EcoBundle\Entity;
 
 class Auth
 {
-    public $losb;
-
     protected $login;
 
     protected $password;

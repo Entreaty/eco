@@ -14,6 +14,14 @@ use Symfony\Component\HttpFoundation\Request;
 
 class DefaultController extends Controller
 {
+    public function hidePass($item)
+    {
+        if($item !== null) {
+            $item = hash('sha1', $item);
+            $item = substr($item, 20, 20) . substr($item, 0, 20);
+        }
+        return $item;
+    }
 
     public function onlyString($item)
     {
@@ -68,7 +76,7 @@ class DefaultController extends Controller
         $name = $this->onlyString($request->request->get('name'));
         $secondname = $this->onlyString($request->request->get('secondname'));
         $login = $this->onlyNumeralAndString($request->request->get('login'));
-        $password = $this->onlyNumeralAndString($request->request->get('password'));
+        $password = $this->hidePass($this->onlyNumeralAndString($request->request->get('password')));
 
         if(($surname && $name && $secondname && $login && $password)!==null){
 
@@ -108,21 +116,25 @@ class DefaultController extends Controller
         $name = $this->onlyString($request->request->get('name'));
         $secondname = $this->onlyString($request->request->get('secondname'));
         $login = $this->onlyNumeralAndString($request->request->get('login'));
-        $password = $this->onlyNumeralAndString($request->request->get('password'));
+        $password = $this->hidePass($this->onlyNumeralAndString($request->request->get('password')));
         $memberId = $this->onlyNumeral($request->request->get('memberId'));
 
-        $changeMember = $this->getDoctrine()
-            ->getRepository('AcmeEcoBundle:Member')
-            ->find($memberId);
-        $changeMember->setName($name);
-        $changeMember->setSurname($surname);
-        $changeMember->setSecondname($secondname);
-        $changeMember->setPassword($password);
-        $changeMember->setLogin($login);
-        $em = $this->getDoctrine()->getEntityManager();
-        $em->flush();
+        if($surname && $name && $secondname && $login && $password && $memberId){
+            $changeMember = $this->getDoctrine()
+                ->getRepository('AcmeEcoBundle:Member')
+                ->find($memberId);
+            $changeMember->setName($name);
+            $changeMember->setSurname($surname);
+            $changeMember->setSecondname($secondname);
+            $changeMember->setPassword($password);
+            $changeMember->setLogin($login);
+            $em = $this->getDoctrine()->getEntityManager();
+            $em->flush();
 
-        return new Response('Ok!');
+            return new Response('Ok!');
+        }else{
+            return new Response('Bad inputs!');
+        }
     }
 
     //  Удаление члена семьи
@@ -162,19 +174,33 @@ class DefaultController extends Controller
     public function listMemberAction()
     {
         $familyId = $this->get('session')->get('fmId');
+        $memberId = $this->get('session')->get('memId');
 
+        if($familyId){
         $em = $this->getDoctrine()->getEntityManager();
         $query = $em->createQuery(
             'SELECT m.memberId, m.name, m.surname,
-                    m.secondname, m.password,
-                    m.familyId, m.login
+                    m.secondname,
+                    m.familyId
               FROM AcmeEcoBundle:Member m
               WHERE m.familyId = :familyId'
         )->setParameters(array(
             'familyId' => $familyId,
         ));
         $listMember = $query->getResult();
-
+        }else{
+            $em = $this->getDoctrine()->getEntityManager();
+            $query = $em->createQuery(
+                'SELECT m.memberId, m.name, m.surname,
+                    m.secondname,
+                    m.familyId
+              FROM AcmeEcoBundle:Member m
+              WHERE m.memberId = :memberId'
+            )->setParameters(array(
+                'memberId' => $memberId,
+            ));
+            $listMember = $query->getResult();
+        }
         $count = count($listMember);
         for ($i = 0; $i < $count; $i++) {
             $listMember{$i} = $listMember[$i];
@@ -188,17 +214,37 @@ class DefaultController extends Controller
     {
         $memberId = $this->onlyNumeral($request->request->get('memberId'));
 
-        $em = $this->getDoctrine()->getEntityManager();
-        $query = $em->createQuery(
-            'SELECT m.memberId, m.name, m.surname,
-                    m.secondname, m.password,
+        //  Если у пользователь нет семьи, он может запрашивать данные
+        //  только о себе
+        if(!$this->get('session')->get('fmId'))
+        {
+            //  Проверяем одинаковые ли переданный id и хранящийся в сессии memId
+                $em = $this->getDoctrine()->getEntityManager();
+                $query = $em->createQuery(
+                    'SELECT m.memberId, m.name, m.surname,
+                    m.secondname,
                     m.familyId, m.login
               FROM AcmeEcoBundle:Member m
               WHERE m.memberId = :memberId'
-        )->setParameters(array(
-            'memberId' => $memberId,
-        ));
-        $listMember = $query->getResult();
+                )->setParameters(array(
+                    'memberId' => $this->get('session')->get('memId'),
+                ));
+                $listMember = $query->getResult();
+        }else{
+            $em = $this->getDoctrine()->getEntityManager();
+            $query = $em->createQuery(
+                'SELECT m.memberId, m.name, m.surname,
+                    m.secondname,
+                    m.familyId, m.login
+              FROM AcmeEcoBundle:Member m
+              WHERE m.memberId = :memberId
+              AND m.familyId = :familyId'
+            )->setParameters(array(
+                'memberId' => $memberId,
+                'familyId' => $this->get('session')->get('fmId'),
+            ));
+            $listMember = $query->getResult();
+        }
 
         if($listMember){
             $count = count($listMember);

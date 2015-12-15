@@ -15,6 +15,15 @@ use Symfony\Component\HttpFoundation\Session\Session;
 
 class AuthController extends Controller
 {
+    public function hidePass($item)
+    {
+        if($item !== null) {
+            $item = hash('sha1', $item);
+            $item = substr($item, 20, 20) . substr($item, 0, 20);
+        }
+        return $item;
+    }
+
     public function onlyString($item)
     {
         return $item = preg_replace('/[^a-zа-я]/iu', '', $item);
@@ -36,7 +45,7 @@ class AuthController extends Controller
         $surname = $this->onlyString($request->request->get('surname'));
         $name = $this->onlyString($request->request->get('name'));
         $secondname = $this->onlyString($request->request->get('secondname'));
-        $password = $this->onlyNumeralAndString($request->request->get('password'));
+        $password = $this->hidePass($this->onlyNumeralAndString($request->request->get('password')));
         $login = $this->onlyNumeralAndString($request->request->get('login'));
 
         if($surname && $name && $secondname && $password && $login)
@@ -84,7 +93,7 @@ class AuthController extends Controller
     public function authAction(Request $request)
     {
         $login = $this->onlyNumeralAndString($request->request->get('login'));
-        $password = $this->onlyNumeralAndString($request->request->get('password'));
+        $password = $this->hidePass($this->onlyNumeralAndString($request->request->get('password')));
 
         //  Проверка введеных данных
         $em = $this->getDoctrine()->getEntityManager();

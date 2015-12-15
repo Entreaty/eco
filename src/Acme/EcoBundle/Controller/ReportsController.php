@@ -40,8 +40,15 @@ class ReportsController extends Controller
     //      для любого члена семьи, всей семьи сразу
     public function summAction(Request $request)
     {
-        $id = $this->onlyNumeral($request->request->get('id'));
-        $who = $this->onlyString($request->request->get('who'));
+        $who = null; $id = null;
+        $memberId = $this->onlyNumeral($request->request->get('memberId'));
+        $familyId = $this->onlyNumeral($request->request->get('familyId'));
+
+        if($memberId){
+            $who = 'memberId'; $id = $memberId;
+        }elseif($familyId){
+            $who = 'familyId'; $id = $familyId;
+        }
 
         //  Находим сумму расходов
         $transactionType = 'wastage';
@@ -81,8 +88,16 @@ class ReportsController extends Controller
 
     public function summForDatesAction(Request $request)
     {
-        $id = $this->onlyNumeral($request->request->get('id'));
-        $who = $this->onlyString($request->request->get('who'));
+        $who = null; $id = null;
+        $memberId = $this->onlyNumeral($request->request->get('memberId'));
+        $familyId = $this->onlyNumeral($request->request->get('familyId'));
+
+        if($memberId){
+            $who = 'memberId'; $id = $memberId;
+        }elseif($familyId){
+            $who = 'familyId'; $id = $familyId;
+        }
+
         $dateFrom = $this->onlyDate($request->request->get('dateFrom'));
         $dateFrom = date_create_from_format('Y-m-d', $dateFrom);
         $dateTo = $this->onlyDate($request->request->get('dateTo'));
@@ -136,7 +151,6 @@ class ReportsController extends Controller
 
         $id=20; $who='familyId';$dateFrom='2015-11-01';$dateTo='2015-12-31';
 
-        //  Находим сумму расходов за каждый день
         $transactionType = 'wastage';
         $em = $this->getDoctrine()->getEntityManager();
         $query = $em->createQuery(
@@ -155,7 +169,6 @@ class ReportsController extends Controller
         ));
         $wastageForEachDay = $query->getResult();
 
-        //  Находим сумму доходов за каждый день
         $transactionType = 'profit';
         $em = $this->getDoctrine()->getEntityManager();
         $query = $em->createQuery(
@@ -188,15 +201,15 @@ class ReportsController extends Controller
         $profit = json_encode($profitForEachDay);
 
         //  Для удобства парсинга ответа добавим разделитель
-//        return new Response($wastage . '~' . $profit);
+        return new Response($wastage . '~' . $profit);
 
-$a= substr(($wastageForEachDay[0]['date']->date),0, 10);
-        $dateFrom = date_create_from_format('Y-m-d', $a);
-$b= substr(($wastageForEachDay[count($wastageForEachDay)-1]['date']->date),0, 10);
-        $dateTo = date_create_from_format('Y-m-d', $b);
-        $c=$dateTo->diff($dateFrom);
-        $days= $c->y*365 + $c->m*30 + $c->d;
-        return new Response(var_dump($a));
+//$a= substr(($wastageForEachDay[0]['date']->date),0, 10);
+//        $dateFrom = date_create_from_format('Y-m-d', $a);
+//$b= substr(($wastageForEachDay[count($wastageForEachDay)-1]['date']->date),0, 10);
+//        $dateTo = date_create_from_format('Y-m-d', $b);
+//        $c=$dateTo->diff($dateFrom);
+//        $days= $c->y*365 + $c->m*30 + $c->d;
+//        return new Response(var_dump($a));
     }
 
 

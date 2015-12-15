@@ -1,3 +1,28 @@
+Для разворачивания приложения необходимо:
+    1)   После загрузки файлов скачать и установить composer (https://getcomposer.org/)
+            Команда для терминала: php -r "readfile('https://getcomposer.org/installer');" | php
+
+    2)   Используяя composer:
+
+           php composer.phar require doctrine/doctrine-fixtures-bundle
+            (все ответы стандартные (just press enter), кроме:
+                database_name: test_project
+                ...
+                locale: ru
+            )
+
+           php app/console doctrine:database:create
+
+           php app/console doctrine:generate:entities AcmeEcoBundle
+
+           php app/console doctrine:schema:update --force
+
+    3)  Очистите кэш:
+
+           php app/console cache:clear --env=dev
+           php app/console cache:clear --env=prod
+
+
 Symfony Standard Edition
 ========================
 
