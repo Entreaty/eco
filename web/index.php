@@ -244,9 +244,18 @@
     <!--Меню списка транзакций -->
     <div class="transactionList ">
         <header class="transactionListMenu">
-            <strong>Общая ведомость расходов и доходов</strong>
-            <select class="chooseMember" id="">
+            <strong>Общая ведомость расходов и доходов</strong><br>
+            Выберите для кого <select class="chooseMember" id="">
+            </select> сортировать по <select name="orederBy" id="orederBy">
+                <option selected value="t.date">Дате</option>
+                <option  value="tt.typeName">Типу</option>
+                <option  value="c.categoryName">Категории</option>
+                <option  value="t.sum">Сумме</option>
+                <option  value="m.name">Члену семьи</option>
+                <option  value="t.transactionId">Дате записи</option>
             </select>
+            <button class="up ">↑</button>
+            <button class="down hide">↓</button>
         </header>
         <table id="transactionTable" class="tablesorter">
             <thead>

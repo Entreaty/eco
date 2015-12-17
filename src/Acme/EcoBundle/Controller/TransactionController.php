@@ -47,7 +47,7 @@ class TransactionController extends Controller
         return filter_var($item, FILTER_VALIDATE_BOOLEAN);
     }
 
-    //  Создадим новый тип транзакции
+    //  Создание новый тип транзакции
     public function newTransactionTypeAction(Request $request)
     {
         $typeName = $this->onlyNumeralAndString(
@@ -66,10 +66,12 @@ class TransactionController extends Controller
                       FROM AcmeEcoBundle:TransactionType t
                       WHERE t.typeName = :typeName
                       AND t.isDeleted = false
-                      AND t.family = :familyId'
+                      AND t.family = :familyId
+                      AND t.type = :type'
                 )->setParameters(array(
                     'typeName' => $typeName,
-                    'familyId' => $familyId
+                    'familyId' => $familyId,
+                    'type' => $type
                 ));
                 $exist = $query->getResult();
 
@@ -490,6 +492,18 @@ class TransactionController extends Controller
     public function listTransactionAction(Request $request)
     {
         $who = null; $id = null;
+        $orderBy = $request->request->get('orderBy');
+        $down = $request->request->get('down');
+
+
+            if($down == 'down'){$direction = 'ASC';}else{$direction = 'DESC';}
+            $by = 't.date';
+            if($orderBy == 't.sum'){$by = 't.sum';}
+            if($orderBy == 't.transactionId'){$by = 't.transactionId';}
+            if($orderBy == 'tt.typeName'){$by = 'tt.typeName';}
+            if($orderBy == 'c.categoryName'){$by = 'c.categoryName';}
+            if($orderBy == 'm.name'){$by = 'm.name';}
+
 
         $memberId = $this->onlyNumeral($request->request->get('memberId'));
         $familyId = $this->get('session')->get('fmId');
@@ -502,7 +516,7 @@ class TransactionController extends Controller
             $who = 'family';
             $id = $familyId;
         }
-
+//        return new Response(var_dump($id,$who,$orderBy));
             $em = $this->getDoctrine()->getEntityManager();
             $query = $em->createQuery(
                 'SELECT t.transactionId,t.sum,t.date,tt.typeName,tt.type, c.categoryName, m.name
@@ -511,7 +525,8 @@ class TransactionController extends Controller
                   join AcmeEcoBundle:Category c WITH t.category = c.categoryId
                   join AcmeEcoBundle:Member m WITH t.member = m.memberId
                   WHERE t.'.$who.' = :id
-                  AND t.isDeleted = false'
+                  AND t.isDeleted = false
+                  ORDER BY '.$by.' '.$direction
             )->setParameters(array(
                 'id' => $id,
             ));

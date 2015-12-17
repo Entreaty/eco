@@ -558,3 +558,14 @@ td.tdButton{
 .red{
     color:coral;
 }
+.up, .down{
+    position: absolute;
+    left:455px;
+    top:30px;
+    background: none;
+    border: none;
+    font-size: 16px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}

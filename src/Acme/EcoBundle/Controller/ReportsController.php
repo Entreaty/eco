@@ -152,6 +152,7 @@ class ReportsController extends Controller
         return new Response("$json");
     }
 
+    //  Отчет по категории транзакции
     public function summByCategoryAction(Request $request)
     {
         $categoryId = $this->onlyNumeral($request->request->get('categoryId'));
@@ -174,7 +175,7 @@ class ReportsController extends Controller
         $json = json_encode(array('name'=>$categoryName, 'y' => (int)$summWastage[0][1]));
         return new Response($json);
     }
-
+    //  Отчет по типу транзакции
     public function summByTypeAction(Request $request)
     {
         $typeId = $this->onlyNumeral($request->request->get('typeId'));
@@ -197,5 +198,4 @@ class ReportsController extends Controller
         $json = json_encode(array('name'=>$typeName, 'y' => (int)$summWastage[0][1]));
         return new Response($json);
     }
-
 }
