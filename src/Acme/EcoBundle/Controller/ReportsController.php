@@ -45,31 +45,35 @@ class ReportsController extends Controller
         $familyId = $this->onlyNumeral($request->request->get('familyId'));
 
         if($memberId){
-            $who = 'memberId'; $id = $memberId;
+            $who = 'member'; $id = $memberId;
         }elseif($familyId){
-            $who = 'familyId'; $id = $familyId;
+            $who = 'family'; $id = $familyId;
         }
 
         //  Находим сумму расходов
-        $transactionType = 'wastage';
         $em = $this->getDoctrine()->getEntityManager();
         $query = $em->createQuery(
-            'SELECT sum(t.sum) FROM AcmeEcoBundle:Transaction t
-              WHERE t.transactionType = :transactionType and t.' . $who . ' = :id'
+            'SELECT sum(t.sum) 
+              FROM AcmeEcoBundle:Transaction t
+              join AcmeEcoBundle:TransactionType tt WITH t.type = tt.typeId
+              WHERE tt.type = false
+              AND t.' . $who . ' = :id
+              AND t.isDeleted = false'
         )->setParameters(array(
-            'transactionType' => $transactionType,
             'id' => $id
         ));
         $summWastage = $query->getResult();
 
         //  Находим сумму доходов
-        $transactionType = 'profit';
         $em = $this->getDoctrine()->getEntityManager();
         $query = $em->createQuery(
-            'SELECT sum(t.sum) FROM AcmeEcoBundle:Transaction t
-              WHERE t.transactionType = :transactionType and t.' . $who . ' = :id'
+            'SELECT sum(t.sum)
+              FROM AcmeEcoBundle:Transaction t
+              join AcmeEcoBundle:TransactionType tt WITH t.type = tt.typeId
+              WHERE tt.type = true
+              AND t.' . $who . ' = :id
+              AND t.isDeleted = false'
         )->setParameters(array(
-            'transactionType' => $transactionType,
             'id' => $id
         ));
         $summProfit = $query->getResult();
@@ -91,40 +95,49 @@ class ReportsController extends Controller
         $who = null; $id = null;
         $memberId = $this->onlyNumeral($request->request->get('memberId'));
         $familyId = $this->onlyNumeral($request->request->get('familyId'));
+        $dateFrom = $this->onlyDate($request->request->get('dateFrom'));
+        $dateTo = $this->onlyDate($request->request->get('dateTo'));
 
         if($memberId){
-            $who = 'memberId'; $id = $memberId;
+            $who = 'member'; $id = $memberId;
         }elseif($familyId){
-            $who = 'familyId'; $id = $familyId;
+            $who = 'family'; $id = $familyId;
         }
-
-        $dateFrom = $this->onlyDate($request->request->get('dateFrom'));
-        $dateFrom = date_create_from_format('Y-m-d', $dateFrom);
-        $dateTo = $this->onlyDate($request->request->get('dateTo'));
-        $dateTo = date_create_from_format('Y-m-d', $dateTo);
-
         //  Находим сумму расходов за выбранный промежуток времени
-        $transactionType = 'wastage';
         $em = $this->getDoctrine()->getEntityManager();
         $query = $em->createQuery(
-            'SELECT sum(t.sum) FROM AcmeEcoBundle:Transaction t
-              WHERE t.transactionType = :transactionType
+            'SELECT sum(t.sum)
+              FROM AcmeEcoBundle:Transaction t
+              join AcmeEcoBundle:TransactionType tt WITH t.type = tt.typeId
+              WHERE tt.type = false
               AND t.' . $who . ' = :id
               AND t.date >= :dateFrom
-              AND t.date <= :dateEnd'
-        )->setParameters(array('transactionType' => $transactionType, 'id' => $id, 'dateFrom' => $dateFrom, 'dateEnd' => $dateTo));
+              AND t.date <= :dateEnd
+              AND t.isDeleted = false'
+
+        )->setParameters(array(
+            'id' => $id,
+            'dateFrom' => $dateFrom,
+            'dateEnd' => $dateTo
+        ));
         $summWastageForDates = $query->getResult();
 
         //  Находим сумму доходов за выбранный промежуток времени
-        $transactionType = 'profit';
         $em = $this->getDoctrine()->getEntityManager();
         $query = $em->createQuery(
-            'SELECT sum(t.sum) FROM AcmeEcoBundle:Transaction t
-              WHERE t.transactionType = :transactionType
+            'SELECT sum(t.sum)
+              FROM AcmeEcoBundle:Transaction t
+              join AcmeEcoBundle:TransactionType tt WITH t.type = tt.typeId
+              WHERE tt.type = true
               AND t.' . $who . ' = :id
               AND t.date >= :dateFrom
-              AND t.date <= :dateEnd'
-        )->setParameters(array('transactionType' => $transactionType, 'id' => $id, 'dateFrom' => $dateFrom, 'dateEnd' => $dateTo));
+              AND t.date <= :dateEnd
+              AND t.isDeleted = false'
+        )->setParameters(array(
+            'id' => $id,
+            'dateFrom' => $dateFrom,
+            'dateEnd' => $dateTo
+        ));
         $summProfitForDates = $query->getResult();
 
         //  Находим разницу между доходом и расходом
@@ -137,98 +150,52 @@ class ReportsController extends Controller
         );
 
         return new Response("$json");
-
     }
-
-    public function summForEachDayAction(Request $request)
-    {
-        $id = $this->onlyNumeral($request->request->get('id'));
-        $who = $this->onlyString($request->request->get('who'));
-        $dateFrom = $this->onlyDate($request->request->get('dateFrom'));
-        $dateFrom = date_create_from_format('Y-m-d', $dateFrom);
-        $dateTo = $this->onlyDate($request->request->get('dateTo'));
-        $dateTo = date_create_from_format('Y-m-d', $dateTo);
-
-        $id=20; $who='familyId';$dateFrom='2015-11-01';$dateTo='2015-12-31';
-
-        $transactionType = 'wastage';
-        $em = $this->getDoctrine()->getEntityManager();
-        $query = $em->createQuery(
-            'SELECT t.transactionType, t.transactionName, t.sum, t.date
-              FROM AcmeEcoBundle:Transaction t
-              WHERE t.transactionType = :transactionType
-              AND t.' . $who . ' = :id
-              AND t.date >= :dateFrom
-              AND t.date <= :dateEnd
-              ORDER BY t.date ASC'
-        )->setParameters(array(
-            'transactionType' => $transactionType,
-            'id' => $id,
-            'dateFrom' => $dateFrom,
-            'dateEnd' => $dateTo
-        ));
-        $wastageForEachDay = $query->getResult();
-
-        $transactionType = 'profit';
-        $em = $this->getDoctrine()->getEntityManager();
-        $query = $em->createQuery(
-            'SELECT t.transactionType, t.transactionName, t.sum, t.date
-              FROM AcmeEcoBundle:Transaction t
-              WHERE t.transactionType = :transactionType
-              AND t.' . $who . ' = :id
-              AND t.date >= :dateFrom
-              AND t.date <= :dateEnd
-              ORDER BY t.date ASC'
-        )->setParameters(array(
-            'transactionType' => $transactionType,
-            'id' => $id,
-            'dateFrom' => $dateFrom,
-            'dateEnd' => $dateTo
-        ));
-        $profitForEachDay = $query->getResult();
-
-        //  Подготовим полученные данные для конвертации в json
-        $count = count($wastageForEachDay);
-        for ($i = 0; $i < $count; $i++) {
-            $wastageForEachDay{$i} = $wastageForEachDay[$i];
-        }
-        $wastage = json_encode($wastageForEachDay);
-
-        $count = count($profitForEachDay);
-        for ($i = 0; $i < $count; $i++) {
-            $profitForEachDay{$i} = $profitForEachDay[$i];
-        }
-        $profit = json_encode($profitForEachDay);
-
-        //  Для удобства парсинга ответа добавим разделитель
-        return new Response($wastage . '~' . $profit);
-
-//$a= substr(($wastageForEachDay[0]['date']->date),0, 10);
-//        $dateFrom = date_create_from_format('Y-m-d', $a);
-//$b= substr(($wastageForEachDay[count($wastageForEachDay)-1]['date']->date),0, 10);
-//        $dateTo = date_create_from_format('Y-m-d', $b);
-//        $c=$dateTo->diff($dateFrom);
-//        $days= $c->y*365 + $c->m*30 + $c->d;
-//        return new Response(var_dump($a));
-    }
-
 
     public function summByCategoryAction(Request $request)
     {
+        $categoryId = $this->onlyNumeral($request->request->get('categoryId'));
         $categoryName = $this->onlyNumeralAndString($request->request->get('categoryName'));
-        $transactionType = $this->onlyString($request->request->get('transactionType'));
-
+        $familyId = $this->get('session')->get('fmId');
 
         $em = $this->getDoctrine()->getEntityManager();
         $query = $em->createQuery(
-            'SELECT sum(t.sum) FROM AcmeEcoBundle:Transaction t WHERE t.transactionType = :transactionType AND t.transactionName = :categoryName'
+            'SELECT sum(t.sum)
+             FROM AcmeEcoBundle:Transaction t
+             WHERE t.category = :categoryId
+             AND t.family = :familyId
+             AND t.isDeleted = false'
         )->setParameters(array(
-            'transactionType' => $transactionType,
-            'categoryName' => $categoryName
+            'categoryId' => $categoryId,
+            'familyId' => $familyId
         ));
         $summWastage = $query->getResult();
 
-        $json = json_encode(array('name'=>$categoryName, 'y' => (int)$summWastage[0][1], 'type' => $transactionType));
+        $json = json_encode(array('name'=>$categoryName, 'y' => (int)$summWastage[0][1]));
         return new Response($json);
     }
+
+    public function summByTypeAction(Request $request)
+    {
+        $typeId = $this->onlyNumeral($request->request->get('typeId'));
+        $typeName = $this->onlyNumeralAndString($request->request->get('typeName'));
+        $familyId = $this->get('session')->get('fmId');
+
+        $em = $this->getDoctrine()->getEntityManager();
+        $query = $em->createQuery(
+            'SELECT sum(t.sum)
+             FROM AcmeEcoBundle:Transaction t
+             WHERE t.type = :typeId
+             AND t.family = :familyId
+             AND t.isDeleted = false'
+        )->setParameters(array(
+            'typeId' => $typeId,
+            'familyId' => $familyId
+        ));
+        $summWastage = $query->getResult();
+
+        $json = json_encode(array('name'=>$typeName, 'y' => (int)$summWastage[0][1]));
+        return new Response($json);
+    }
+
 }

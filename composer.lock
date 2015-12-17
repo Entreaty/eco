@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "0b05f9dc710d847a6b25213011214fe6",
-    "content-hash": "a8b38a78e3d8676f42e75222608ade69",
+    "hash": "794acfed16d36722bfcf68490c0d110e",
+    "content-hash": "1a5fa712df9efaef381c99041895277d",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -571,7 +571,7 @@
         },
         {
             "name": "doctrine/doctrine-fixtures-bundle",
-            "version": "dev-master",
+            "version": "2.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/DoctrineFixturesBundle.git",
@@ -1791,7 +1791,6 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "doctrine/doctrine-fixtures-bundle": 20,
         "doctrine/data-fixtures": 20
     },
     "prefer-stable": false,

@@ -17,19 +17,14 @@ class Transaction
     protected $transactionId;
 
     /**
-     * @ORM\Column(type="string")
-     */
-    protected $transactionType;
-
-    /**
-     * @ORM\Column(type="string")
-     */
-    protected $transactionName;
-
-    /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="float")
      */
     protected $sum;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    protected $isDeleted;
 
     /**
      * @ORM\Column(type="date")
@@ -37,16 +32,32 @@ class Transaction
     protected $date;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Member", inversedBy="transactions")
-     * @ORM\JoinColumn(name="memberId", referencedColumnName="memberId")
-     * @ORM\Column(type="integer")
+     * @ORM\ManyToOne(targetEntity="Category", inversedBy="transactions")
+     * @ORM\JoinColumn(name="categoryId", referencedColumnName="categoryId")
      */
-    protected $memberId;
+    protected $category;
 
     /**
-     * @ORM\Column(type="integer", nullable =true)
+     * @ORM\ManyToOne(targetEntity="Member", inversedBy="transactions")
+     * @ORM\JoinColumn(name="memberId", referencedColumnName="memberId")
      */
-    protected $familyId;
+    protected $member;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Family", inversedBy="transactions")
+     * @ORM\JoinColumn(name="familyId", referencedColumnName="familyId")
+     */
+    protected $family;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="TransactionType", inversedBy="transactions")
+     * @ORM\JoinColumn(name="typeId", referencedColumnName="typeId")
+     */
+    protected $type;
+
+
+
+
 
     /**
      * Get transactionId
@@ -56,52 +67,6 @@ class Transaction
     public function getTransactionId()
     {
         return $this->transactionId;
-    }
-
-    /**
-     * Set transactionType
-     *
-     * @param string $transactionType
-     * @return Transaction
-     */
-    public function setTransactionType($transactionType)
-    {
-        $this->transactionType = $transactionType;
-
-        return $this;
-    }
-
-    /**
-     * Get transactionType
-     *
-     * @return string 
-     */
-    public function getTransactionType()
-    {
-        return $this->transactionType;
-    }
-
-    /**
-     * Set transactionName
-     *
-     * @param string $transactionName
-     * @return Transaction
-     */
-    public function setTransactionName($transactionName)
-    {
-        $this->transactionName = $transactionName;
-
-        return $this;
-    }
-
-    /**
-     * Get transactionName
-     *
-     * @return string 
-     */
-    public function getTransactionName()
-    {
-        return $this->transactionName;
     }
 
     /**
@@ -127,89 +92,141 @@ class Transaction
         return $this->sum;
     }
 
-//    /**
-//     * Set date
-//     *
-//     * @param \DateTime $date
-//     * @return Transaction
-//     */
-//    public function setDate($date)
-//    {
-//        $this->date = $date;
-//
-//        return $this;
-//    }
-//
-//    /**
-//     * Get date
-//     *
-//     * @return \DateTime
-//     */
-//    public function getDate()
-//    {
-//        return $this->date;
-//    }
-
     /**
-     * Set memberId
+     * Set isDeleted
      *
-     * @param integer $memberId
+     * @param integer $isDeleted
      * @return Transaction
      */
-    public function setMemberId($memberId)
+    public function setIsDeleted($isDeleted)
     {
-        $this->memberId = $memberId;
+        $this->isDeleted = $isDeleted;
 
         return $this;
     }
 
     /**
-     * Get memberId
+     * Get isDeleted
      *
      * @return integer 
      */
-    public function getMemberId()
+    public function getIsDeleted()
     {
-        return $this->memberId;
-    }
-
-    public function setCreatedAtValue()
-    {
-        if(!$this->getCreatedAt())
-        {
-            $this->created_at = new \DateTime();
-        }
+        return $this->isDeleted;
     }
 
     /**
-     * Set familyId
+     * Set date
      *
-     * @param integer $familyId
+     * @param \DateTime $date
      * @return Transaction
      */
-    public function setFamilyId($familyId)
+    public function setDate($date)
     {
-        $this->familyId = $familyId;
+        $this->date = $date;
 
         return $this;
     }
 
     /**
-     * Get familyId
+     * Get date
      *
-     * @return integer 
+     * @return \DateTime 
      */
-    public function getFamilyId()
-    {
-        return $this->familyId;
-    }
-
     public function getDate()
     {
         return $this->date;
     }
-    public function setDate(\DateTime $date = null)
+
+    /**
+     * Set category
+     *
+     * @param \Acme\EcoBundle\Entity\Category $category
+     * @return Transaction
+     */
+    public function setCategory(\Acme\EcoBundle\Entity\Category $category = null)
     {
-        $this->date = $date;
+        $this->category = $category;
+
+        return $this;
+    }
+
+    /**
+     * Get category
+     *
+     * @return \Acme\EcoBundle\Entity\Category 
+     */
+    public function getCategory()
+    {
+        return $this->category;
+    }
+
+    /**
+     * Set member
+     *
+     * @param \Acme\EcoBundle\Entity\Member $member
+     * @return Transaction
+     */
+    public function setMember(\Acme\EcoBundle\Entity\Member $member = null)
+    {
+        $this->member = $member;
+
+        return $this;
+    }
+
+    /**
+     * Get member
+     *
+     * @return \Acme\EcoBundle\Entity\Member 
+     */
+    public function getMember()
+    {
+        return $this->member;
+    }
+
+    /**
+     * Set family
+     *
+     * @param \Acme\EcoBundle\Entity\Family $family
+     * @return Transaction
+     */
+    public function setFamily(\Acme\EcoBundle\Entity\Family $family = null)
+    {
+        $this->family = $family;
+
+        return $this;
+    }
+
+    /**
+     * Get family
+     *
+     * @return \Acme\EcoBundle\Entity\Family 
+     */
+    public function getFamily()
+    {
+        return $this->family;
+    }
+
+    /**
+     * Set type
+     *
+     * @param \Acme\EcoBundle\Entity\TransactionType $type
+     * @return Transaction
+     */
+    public function setType(\Acme\EcoBundle\Entity\TransactionType $type = null)
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    /**
+     * Get type
+     *
+     * @return \Acme\EcoBundle\Entity\TransactionType 
+     */
+    public function getType()
+    {
+        return $this->type;
     }
 }

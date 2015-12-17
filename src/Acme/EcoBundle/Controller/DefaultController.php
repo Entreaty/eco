@@ -4,10 +4,12 @@ namespace Acme\EcoBundle\Controller;
 
 
 use Acme\EcoBundle\Entity\NewFamily;
+use Acme\EcoBundle\Entity\TransactionType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Acme\EcoBundle\Entity\Transaction;
 use Acme\EcoBundle\Entity\Member;
 use Acme\EcoBundle\Entity\Family;
+use Acme\EcoBundle\Entity\Category;
 use Acme\EcoBundle\Entity\NewMember;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -38,37 +40,6 @@ class DefaultController extends Controller
         return $item = preg_replace('/[^a-zа-я0-9 ]/iu', '', $item);
     }
 
-    //  Создание новой семьи
-    public function newFamilyAction(Request $request)
-    {
-        $memberId = $this->onlyNumeral($request->request->get('memberId'));
-        $familyName = $this->onlyString($request->request->get('familyName'));
-
-        if($familyName && $memberId){
-        $family = new Family();
-        $family->setFamilyName($familyName);
-        $em = $this->getDoctrine()->getEntityManager();
-        $em->persist($family);
-        $em->flush();
-
-        //  Создаем familyId переменную в сессии
-        $familyId = $family->getFamilyId();
-        $this->get('session')->set('fmId', ($familyId));
-        setcookie('familyId', $familyId, null, '/web/index.php');
-
-        //  Заполняем familyId пользователя
-        $changeFamilyId = $this->getDoctrine()
-            ->getRepository('AcmeEcoBundle:Member')
-            ->find($memberId);
-        $changeFamilyId->setFamilyId($familyId);
-        $em->flush();
-
-        return new Response('Ok!');
-        }else{
-            return new Response('Bad name!');
-        }
-    }
-
     //  Создание нового члена семьи
     public function newMemberAction(Request $request)
     {
@@ -77,35 +48,40 @@ class DefaultController extends Controller
         $secondname = $this->onlyString($request->request->get('secondname'));
         $login = $this->onlyNumeralAndString($request->request->get('login'));
         $password = $this->hidePass($this->onlyNumeralAndString($request->request->get('password')));
-
-        if(($surname && $name && $secondname && $login && $password)!==null){
-
         $familyId = $this->get('session')->get('fmId');
 
-        $em = $this->getDoctrine()->getEntityManager();
-        $query = $em->createQuery(
-            'SELECT m.memberId FROM AcmeEcoBundle:Member m WHERE m.login = :login'
-        )->setParameter('login', $login);
-
-        $exist = $query->getResult();
-        if (!$exist) {
-            $member = new Member;
-            $member->setName($name);
-            $member->setSurname($surname);
-            $member->setSecondname($secondname);
-            $member->setPassword($password);
-            $member->setLogin($login);
-            $member->setFamilyId($familyId);
+        if($surname && $name && $secondname && $login && $password && $familyId)
+        {
             $em = $this->getDoctrine()->getEntityManager();
-            $em->persist($member);
-            $em->flush();
+            $query = $em->createQuery(
+                'SELECT m.memberId FROM AcmeEcoBundle:Member m WHERE m.login = :login
+                  AND m.isDeleted = false'
+            )->setParameter('login', $login);
+            $exist = $query->getResult();
 
-            return new Response('Ok!');
-        } else {
-            return new Response('Login already exist!');
-        }
-        }else{
-            return new Response('Bad inputs!');
+            if (!$exist) {
+                $family = $this->getDoctrine()
+                    ->getRepository('AcmeEcoBundle:Family')
+                    ->find($familyId);
+
+                $member = new Member;
+                $member->setName($name);
+                $member->setSurname($surname);
+                $member->setSecondname($secondname);
+                $member->setPassword($password);
+                $member->setLogin($login);
+                $member->setFamily($family);
+                $member->setIsDeleted(false);
+                $em = $this->getDoctrine()->getEntityManager();
+                $em->persist($member);
+                $em->flush();
+
+                return new Response('Ok!');
+            } else {
+                return new Response('Login already exist!');
+            }
+            }else{
+                return new Response('Bad inputs!');
         }
     }
 
@@ -148,7 +124,7 @@ class DefaultController extends Controller
                 ->getRepository('AcmeEcoBundle:Member')
                 ->find($this->get('session')->get('memId'));
             $em = $this->getDoctrine()->getEntityManager();
-            $em->remove($deleteMember);
+            $deleteMember->setIsDeleted(true);
             $em->flush();
 
             $this->get('session')->set('fmId', null);
@@ -163,7 +139,7 @@ class DefaultController extends Controller
                 ->getRepository('AcmeEcoBundle:Member')
                 ->find($memberId);
             $em = $this->getDoctrine()->getEntityManager();
-            $em->remove($deleteMember);
+            $deleteMember->setIsDeleted(true);
             $em->flush();
 
             return new Response('Ok!');
@@ -174,77 +150,49 @@ class DefaultController extends Controller
     public function listMemberAction()
     {
         $familyId = $this->get('session')->get('fmId');
-        $memberId = $this->get('session')->get('memId');
 
-        if($familyId){
         $em = $this->getDoctrine()->getEntityManager();
         $query = $em->createQuery(
             'SELECT m.memberId, m.name, m.surname,
-                    m.secondname,
-                    m.familyId
+                    m.secondname
               FROM AcmeEcoBundle:Member m
-              WHERE m.familyId = :familyId'
+              WHERE m.family = :familyId
+              AND m.isDeleted = false'
         )->setParameters(array(
             'familyId' => $familyId,
         ));
         $listMember = $query->getResult();
+
+        if($listMember){
+            $count = count($listMember);
+            for ($i = 0; $i < $count; $i++) {
+                $listMember{$i} = $listMember[$i];
+            }
+            return new Response(json_encode($listMember));
         }else{
-            $em = $this->getDoctrine()->getEntityManager();
-            $query = $em->createQuery(
-                'SELECT m.memberId, m.name, m.surname,
-                    m.secondname,
-                    m.familyId
-              FROM AcmeEcoBundle:Member m
-              WHERE m.memberId = :memberId'
-            )->setParameters(array(
-                'memberId' => $memberId,
-            ));
-            $listMember = $query->getResult();
+            return new Response('Bad!');
         }
-        $count = count($listMember);
-        for ($i = 0; $i < $count; $i++) {
-            $listMember{$i} = $listMember[$i];
-        }
-        //  Возвращаем результат в удобной форме json
-        return new Response(json_encode($listMember));
     }
 
     //  Информация о конкретном пользователе
     public function showMemberAction(Request $request)
     {
         $memberId = $this->onlyNumeral($request->request->get('memberId'));
+        $familyId = $this->get('session')->get('fmId');
 
-        //  Если у пользователь нет семьи, он может запрашивать данные
-        //  только о себе
-        if(!$this->get('session')->get('fmId'))
-        {
-            //  Проверяем одинаковые ли переданный id и хранящийся в сессии memId
-                $em = $this->getDoctrine()->getEntityManager();
-                $query = $em->createQuery(
-                    'SELECT m.memberId, m.name, m.surname,
-                    m.secondname,
-                    m.familyId, m.login
-              FROM AcmeEcoBundle:Member m
-              WHERE m.memberId = :memberId'
-                )->setParameters(array(
-                    'memberId' => $this->get('session')->get('memId'),
-                ));
-                $listMember = $query->getResult();
-        }else{
-            $em = $this->getDoctrine()->getEntityManager();
-            $query = $em->createQuery(
-                'SELECT m.memberId, m.name, m.surname,
-                    m.secondname,
-                    m.familyId, m.login
+        $em = $this->getDoctrine()->getEntityManager();
+        $query = $em->createQuery(
+            'SELECT m.memberId, m.name, m.surname,
+              m.secondname, m.login
               FROM AcmeEcoBundle:Member m
               WHERE m.memberId = :memberId
-              AND m.familyId = :familyId'
-            )->setParameters(array(
-                'memberId' => $memberId,
-                'familyId' => $this->get('session')->get('fmId'),
-            ));
-            $listMember = $query->getResult();
-        }
+              AND m.family = :familyId
+              AND m.isDeleted = false'
+        )->setParameters(array(
+            'memberId' => $memberId,
+            'familyId' => $familyId,
+        ));
+        $listMember = $query->getResult();
 
         if($listMember){
             $count = count($listMember);
@@ -254,15 +202,9 @@ class DefaultController extends Controller
 
             return new Response(json_encode($listMember));
         }else{
-            return new Response(null);
+            return new Response('Bad!');
         }
     }
 
-    public function testAction(){
-        // Проверка авторизован ли пользователь
-        if (!$this->get('session')->get('memId')) {
-            throw $this->createNotFoundException('Авторизуйтесь пожалуйста!!!');
-        }
-    }
 
 }

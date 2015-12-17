@@ -18,6 +18,26 @@ acme_eco_new_member:
     path:     /newMember
     defaults: { _controller: AcmeEcoBundle:Default:newMember}
 
+acme_eco_change_member:
+    path:     /changeMember
+    defaults: { _controller: AcmeEcoBundle:Default:changeMember}
+
+acme_eco_delete_member:
+    path:     /deleteMember
+    defaults: { _controller: AcmeEcoBundle:Default:deleteMember}
+
+acme_eco_list_member:
+    path:     /listMember
+    defaults: { _controller: AcmeEcoBundle:Default:listMember}
+
+acme_eco_show_member:
+    path:     /showMember
+    defaults: { _controller: AcmeEcoBundle:Default:showMember}
+
+acme_eco_tester_member:
+    path:     /tester
+    defaults: { _controller: AcmeEcoBundle:Default:tester}
+
 acme_eco_registration_member:
     path:     /registration
     defaults: { _controller: AcmeEcoBundle:Auth:registration}
@@ -35,25 +55,29 @@ acme_eco_checkAuth_member:
     path:     /checkAuth
     defaults: { _controller: AcmeEcoBundle:Auth:checkAuth }
 
-acme_eco_change_member:
-    path:     /changeMember
-    defaults: { _controller: AcmeEcoBundle:Default:changeMember}
-
-acme_eco_delete_member:
-    path:     /deleteMember
-    defaults: { _controller: AcmeEcoBundle:Default:deleteMember}
-
-acme_eco_list_member:
-    path:     /listMember
-    defaults: { _controller: AcmeEcoBundle:Default:listMember}
-
-acme_eco_show_member:
-    path:     /showMember
-    defaults: { _controller: AcmeEcoBundle:Default:showMember}
-
 acme_eco_new_category:
     path:     /newCategory
     defaults: { _controller: AcmeEcoBundle:Transaction:newCategory }
+
+acme_eco_new_transactionType:
+    path:     /newTransactionType
+    defaults: { _controller: AcmeEcoBundle:Transaction:newTransactionType }
+
+acme_eco_change_transactionType:
+    path:     /changeTransactionType
+    defaults: { _controller: AcmeEcoBundle:Transaction:changeTransactionType }
+
+acme_eco_delete_transactionType:
+    path:     /deleteTransactionType
+    defaults: { _controller: AcmeEcoBundle:Transaction:deleteTransactionType }
+
+acme_eco_show_transactionType:
+    path:     /showTransactionType
+    defaults: { _controller: AcmeEcoBundle:Transaction:showTransactionType }
+
+acme_eco_list_transactionType:
+    path:     /listTransactionType
+    defaults: { _controller: AcmeEcoBundle:Transaction:listTransactionType }
 
 acme_eco_delete_category:
     path:     /deleteCategory
@@ -91,6 +115,10 @@ acme_eco_list_transaction:
     path:     /listTransaction
     defaults: { _controller: AcmeEcoBundle:Transaction:listTransaction}
 
+acme_eco_demo_transaction:
+    path:     /demo
+    defaults: { _controller: AcmeEcoBundle:Transaction:demo}
+
 acme_eco_summ_reports:
     path:     /summ
     defaults: { _controller: AcmeEcoBundle:Reports:summ}
@@ -106,3 +134,11 @@ acme_eco_summForEachDay_reports:
 acme_eco_summByCategory_reports:
     path:     /summByCategory
     defaults: { _controller: AcmeEcoBundle:Reports:summByCategory}
+
+acme_eco_summByType_reports:
+    path:     /summByType
+    defaults: { _controller: AcmeEcoBundle:Reports:summByType}
+
+acme_eco_forecast_reports:
+    path:     /forecast
+    defaults: { _controller: AcmeEcoBundle:Reports:forecast}

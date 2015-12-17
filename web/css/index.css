@@ -3,7 +3,7 @@ body{
     height:100%;
     width: 1200px;
     margin:auto;
-    font-size: 12pt;
+    font-size: 11pt;
     font-family: 'Segoe UI Emoji';
 }
 p{
@@ -20,6 +20,13 @@ select{
     padding:0;
     background: #D3D3D3;
 }
+.pieCharts{
+    position: absolute;
+    bottom:0;
+    left:0;
+    width:auto;
+    height:430px;
+}
 .footer{
     position: relative;
     height: 70px;
@@ -31,7 +38,7 @@ select{
 }
 .container{
     position: relative;
-    min-height:1200px;
+    min-height:1300px;
     height:100%;
     padding-top: 60px;
     width: 1200px;
@@ -94,7 +101,16 @@ input{
     width: 300px;
 }
 
-.agreeLogin, .AgreeRegistration, .agreeNewFamily, .agreeNewMember, .agreeChangeMember {
+.agreeLogin, .AgreeRegistration, .agreeNewFamily {
+    color: #ffffff;
+    background: #00abec;
+    position: relative;
+    height:50px;
+    width: 200px;
+    /*padding-top:0;*/
+    margin: 15px 50px;
+}
+.agreeNewMember, .agreeChangeMember {
     color: #ffffff;
     background: #00abec;
     position: relative;
@@ -170,7 +186,7 @@ a{
     border: none; /* Убираем рамку */
 }
 .stringOfMemberList{
-    font-size: 12pt;
+    font-size: 11pt;
     font-family: 'Segoe UI Emoji';
 }
 .buttons{
@@ -179,88 +195,23 @@ a{
     border: none;
     cursor: pointer;
 }
-
-.category{
-    width: 250px;
-    height:130px;
-    padding: 5px 15px 5px 15px;
-    position: relative;
-    background: lightgray;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    /*padding:13px 0;*/
-    top:30px;
-    left: 0;
-    /*font-size: 12pt;*/
-    /*font-family: 'Segoe UI Emoji';*/
-    cursor: pointer;
-    text-align: start;
-    overflow: auto;
-}
-.agreeCategory, .agreeChangeCategory, .agreeChangeTransaction{
+.agreeCategory,  .agreeTransaction, .agreeType{
     color: #ffffff;
     background: #00abec;
     position: relative;
-    height:36px;
-    width: 240px;
-    top:10px;
+    height:25px;
+    width: 100px;
+    top:5px;
+    right:0;
+    margin: 0 0 0 150px;
+    border-radius: 15px;
     /*padding-top:0;*/
     /*margin: 10px 50px;*/
-}
-.categoryList{
-    width: 250px;
-    height:300px;
-    padding: 5px 15px 5px 15px;
-    position: relative;
-    background: lightgray;
-    border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 5px;
-    /*padding:13px 0;*/
-    top:30px;
-    left: 0;
-    font-size: 12pt;
-    font-family: 'Segoe UI Emoji';
-    cursor: pointer;
-    text-align: start;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-p.profit{
-    /*width: auto;*/
-    width: 240px;
-    height:30px;
-    padding: 5px 0 5px 0 ;
-    margin: 0;
-    background: lightgreen;
-}
-p.wastage{
-    width: 240px;
-    height:30px;
-    padding: 5px 0 5px 0 ;
-    margin: 0;
-    background: lightcoral;
-}
-tr.wastage{
-    background: lightcoral;
-}
-tr.profit{
-    background: lightgreen;
-}
-th{
-    width: auto;
-}
-.changeCategory, .deleteCategory{
-
-    height: 30px;
-    width: 28px;
-    opacity: 0.9;
-    background: none;
-    border: none;
-    /*bottom:20px;*/
+    /*z-index: 3;*/
 }
 .transaction{
     width: 250px;
-    height:190px;
+    height:180px;
     padding: 5px 15px 5px 15px;
     position: relative;
     background: lightgray;
@@ -274,31 +225,130 @@ th{
     text-align: start;
     overflow: auto;
 }
-.transInput{
-    width: 150px;
-    height: 25px;
+.type{
+    width: 250px;
+    height:300px;
+    padding: 5px 15px 5px 15px;
+    position: relative;
+    background: lightgray;
+    border-radius: 5px;
+    top:10px;
+    left: 0;
     font-size: 12pt;
     font-family: 'Segoe UI Emoji';
+    cursor: pointer;
+    text-align: start;
+    overflow-y: hidden;
+    overflow-x: hidden;
 }
-.transLabel{
+.typesList, .categoryList{
+    width: 250px;
+    height:180px;
+    padding: 0;
+    position: relative;
+    /*background: lightgreen;*/
+    /*padding:13px 0;*/
+    top:10px;
+    left: 0;
+    font-size: 10pt;
+    font-family: 'Segoe UI Emoji';
+    cursor: pointer;
+    text-align: start;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 1;
+}
+.categoryList{height:210px;}
+.category{
+    width: 250px;
+    height:300px;
+    padding: 5px 15px 5px 15px;
+    position: relative;
+    background: lightgray;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    /*padding:13px 0;*/
+    top:5px;
+    left: 0;
+    /*font-size: 12pt;*/
+    /*font-family: 'Segoe UI Emoji';*/
+    cursor: pointer;
+    text-align: start;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+option.false{
+    width: auto;
+    height:auto;
+    background: lightcoral;
+}
+option.true{
+    width: auto;
+    height:auto;
+    background: lightgreen;
+}
+p.true{
+    /*width: auto;*/
+    width: 240px;
+    height:30px;
+    padding: 5px 0 5px 0 ;
+    margin: 0;
+    background: lightgreen;
+    z-index: 2;
+    cursor: pointer;
+}
+p.false{
+    width: 240px;
+    height:30px;
+    padding: 5px 0 5px 0 ;
+    margin: 0;
+    background: lightcoral;
+    z-index: 2;
+    cursor: pointer;
+}
+tr.false{
+    background: lightcoral;
+}
+tr.true{
+    background: lightgreen;
+}
+th{
+    width: auto;
+}
+.changeCategory, .deleteCategory, .deleteType, .changeType, .changeTransaction, .deleteTransaction{
+
+    height: 30px;
+    width: 28px;
+    opacity: 0.9;
+    background: none;
+    border: none;
+    /*bottom:20px;*/
+}
+
+.typeSelect,.transSelect, .transSelect2{
+    width: 144px;
+    height: 25px;
+    font-size: 10pt;
+    margin:3px;
+    font-family: 'Segoe UI Emoji';
+}
+.transInput, .typeInput{
+    width: 140px;
+    height: 18px;
+    font-size: 10pt;
+    margin:3px;
+    font-family: 'Segoe UI Emoji';
+}
+.transLabel, .typeLabel{
     display: inline-block;
     width: 90px;
     height: 25px;
     font-size: 12pt;
     font-family: 'Segoe UI Emoji';
 }
-.agreeTransaction{
-    color: #ffffff;
-    background: #00abec;
-    position: relative;
-    height:36px;
-    width: 240px;
-    top:10px;
-    /*padding-top:0;*/
-    /*margin: 10px 50px;*/
-}
 
-.formChangeCategory{
+
+.formChangeCategory , .formChangeType{
     width: 250px;
     height:100px;
     padding: 30px;
@@ -325,30 +375,30 @@ th{
 .transactionList{
     overflow-y: auto;
     overflow-x: hidden;
-    width: 570px;
+    width: 590px;
     /*max-height:300px;*/
     min-height:100px;
     max-height:350px;
     padding: 10px;
     background: linear-gradient(to top, #fafafa, #f5f5f5);
     position: absolute;
-    top: 370px;
-    left:300px;
-    font-size: 12pt;
+    top: 60px;
+    left:290px;
+    font-size: 11pt;
     font-family: 'Segoe UI Emoji';
 }
 
 #transactionTable{
-    width: 550px;
+    width: 580px;
     min-height:100px;
     max-height:300px;
 }
 td.tdName{
     /*min-width:auto;*/
-    width: 250px;
+    width: 150px;
 }
 td.tdDate{
-    width: 90px;
+    width: 120px;
     padding: 5px;
 }
 td.tdSum{
@@ -360,7 +410,10 @@ td.tdButton{
     padding: 0;
     width:30px;
 }
-
+.reports{
+    position:absolute;
+    top: 400px;
+}
 .report1{
     position: absolute;
     display: inline-block;
@@ -390,34 +443,30 @@ td.tdButton{
     right: 15px;
 }
 
-span{
-    position: relative;
-    width:100px;
-    height:20px;
-    top: 7px;
-}
+/*span.span{*/
+    /*position: relative;*/
+    /*width:100px;*/
+    /*height:20px;*/
+    /*top: 7px;*/
+/*}*/
 #to,#from{
     width:70px;
     height: 15px;
     /*position: absolute;*/
     /*right: 15px;*/
 }
-.agreeReport1, .agreeReport2{
+.agreeReport1, .agreeReport2, .declineReport1{
     color: #ffffff;
     background: #00abec;
     position: relative;
-    height:23px;
-    width: 120px;
+    height:25px;
+    width: 100px;
+    display: inline-block;
+    border-radius: 15px;
     /*padding-top:0;*/
     /*margin: 15px 50px;*/
 }
-.pieCharts{
-    position: absolute;
-    bottom:0;
-    left:0;
-    width:auto;
-    height:400px;
-}
+
 .close, .close2{
     position: absolute;
     top:5px;
@@ -438,4 +487,74 @@ span{
     position: absolute;
     right:40px;
     top:10px;
+}
+.agreeChangeCategory, .agreeChangeType, .agreeChangeTransaction {
+    width:100px;
+    height:30px;
+    position: relative;
+    margin: 40px 80px;
+    color: #ffffff;
+    background: #00abec;
+}
+.transLabel2, .typeLabel, .transInput2{
+    display: inline-block;
+    width: 125px;
+    height: 20px;
+    font-size: 11pt;
+    margin: 5px 5px;
+}
+.changeType2{
+    position: absolute;
+    display: inline-block;
+    width: 128px;
+    top: 65px;
+    right: 8px;
+    height: 25px;
+    font-size: 10pt;
+    margin: 0 43px;
+    z-index: 999;
+}
+.formChangeType{
+    width: 250px;
+    height:120px;
+    padding: 30px;
+    background: linear-gradient(to top, #fafafa, #f5f5f5);
+    position: absolute;
+    /*margin-left: auto;*/
+    /*margin-right: auto;*/
+    top:300px;
+    left:475px;
+    /*z-index: 998;*/
+}
+.noTransactions{
+    height:30px;
+    padding:0;
+    margin:0;
+    position: relative;
+    top:180px;
+    left:170px;
+}
+.buttonNewMember {
+    cursor: pointer;
+}
+.ui-datepicker-calendar{
+    width: 17em;
+}
+#container1{
+    position: relative;
+    left:910px;
+    top:-500px;
+}
+.wellcome{
+    position: absolute;
+    width: auto;
+    top: 12px;
+    left: 50px;
+
+}
+.diagramCategory{
+    cursor: pointer;
+}
+.red{
+    color:coral;
 }

@@ -55,19 +55,26 @@ class AuthController extends Controller
             $query = $em->createQuery(
                 'SELECT m.memberId
                   FROM AcmeEcoBundle:Member m
-                  WHERE m.login = :login'
+                  WHERE m.login = :login
+                  AND m.isDeleted = false'
             )->setParameter('login', $login);
 
             //  Если логин оригинальный, регистрируем нового пользователя
             $exist = $query->getResult();
             if (!$exist) {
+                $family = new Family();
+                $family->setFamilyName($surname);
+
                 $member = new Member;
                 $member->setName($name);
                 $member->setSurname($surname);
                 $member->setSecondname($secondname);
                 $member->setPassword($password);
                 $member->setLogin($login);
+                $member->setFamily($family);
+                $member->setIsDeleted(false);
                 $em = $this->getDoctrine()->getEntityManager();
+                $em->persist($family);
                 $em->persist($member);
                 $em->flush();
 
@@ -76,9 +83,11 @@ class AuthController extends Controller
                 $this->get('session')->set('fmId', null);
                 // Создаем переменную личного идентификатора memId в сессии
                 $memberId = $member->getMemberId();
-                $this->get('session')->set('memId', ($memberId));
+                $familyId = $family->getFamilyId();
+                $this->get('session')->set('memId', ($member->getMemberId()));
+                $this->get('session')->set('fmId', ($family->getFamilyId()));
                 setcookie('memberId', $memberId, null, '/web/index.php');
-                setcookie('familyId', null, 0, '/web/index.php');
+                setcookie('familyId', $familyId, null, '/web/index.php');
 
                 return new Response('Ok!');
             } else {
@@ -95,36 +104,35 @@ class AuthController extends Controller
         $login = $this->onlyNumeralAndString($request->request->get('login'));
         $password = $this->hidePass($this->onlyNumeralAndString($request->request->get('password')));
 
-        //  Проверка введеных данных
-        $em = $this->getDoctrine()->getEntityManager();
-        $query = $em->createQuery(
-            'SELECT m.memberId, m.familyId
+        if($login && $password){
+            //  Проверка введеных данных
+            $em = $this->getDoctrine()->getEntityManager();
+            $query = $em->createQuery(
+                'SELECT m.memberId, f.familyId
               FROM AcmeEcoBundle:Member m
+              join AcmeEcoBundle:Family f WITH m.family= f.familyId
               WHERE m.login = :login
               AND m.password = :password'
-        )->setParameters(array(
-            'login' => $login,
-            'password' => $password
-        ));
-        $exist = $query->getResult();
+            )->setParameters(array(
+                'login' => $login,
+                'password' => $password
+            ));
+            $exist = $query->getResult();
 
-        if ($exist) {
-            // Добавляем в переменные сессии familyId и memberId
-            if ($exist[0]["memberId"]) {
+            if ($exist) {
+//             Добавляем в переменные сессии familyId и memberId
                 $this->get('session')->set('memId', ($exist[0]["memberId"]));
                 setcookie('memberId', $exist[0]["memberId"], null, '/web/index.php');
-            }
-            if ($exist[0]["familyId"]) {
                 $this->get('session')->set('fmId', ($exist[0]["familyId"]));
                 setcookie('familyId', $exist[0]["familyId"], null, '/web/index.php');
+
+                return new Response('Ok!');
+
+            } else{return new Response('No!');
             }
-
-            return new Response('Ok!');
-
-        } else
-
-            return new Response('No!');
-
+        }else{
+            return new Response('Bad!');
+        }
     }
 
     public function logoutAction(Request $request)

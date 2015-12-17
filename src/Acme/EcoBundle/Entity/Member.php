@@ -2,6 +2,7 @@
 namespace Acme\EcoBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+
 /**
  * @ORM\Entity
  * @ORM\Entity(repositoryClass="Acme\EcoBundle\Entity\MemberRepository")
@@ -37,17 +38,23 @@ class Member
     protected $password;
 
     /**
-     * @ORM\Column(type="string", unique=true)
+     * @ORM\Column(type="string")
      */
     protected $login;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    protected $familyId;
+    protected $isDeleted;
 
     /**
-     * @ORM\OneToMany(targetEntity="Transaction", mappedBy="memberId")
+     * @ORM\ManyToOne(targetEntity="Family", inversedBy="members")
+     * @ORM\JoinColumn(name="familyId", referencedColumnName="familyId")
+     */
+    protected $family; //familyId = family , on получает её из другой сущности. с именем Family
+
+    /**
+     * @ORM\OneToMany(targetEntity="Transaction", mappedBy="member")
      */
     protected $transactions;
 
@@ -55,6 +62,7 @@ class Member
     {
         $this->transactions = new ArrayCollection();
     }
+
 
     /**
      * Get memberId
@@ -64,16 +72,6 @@ class Member
     public function getMemberId()
     {
         return $this->memberId;
-    }
-    /**
-     * Set memberId
-     *
-     * @return integer
-     */
-    public function setMemberId($memberId)
-    {
-        $this->memberId = $memberId;
-        return $this;
     }
 
     /**
@@ -148,7 +146,7 @@ class Member
     /**
      * Set password
      *
-     * @param integer $password
+     * @param string $password
      * @return Member
      */
     public function setPassword($password)
@@ -161,34 +159,11 @@ class Member
     /**
      * Get password
      *
-     * @return integer 
+     * @return string 
      */
     public function getPassword()
     {
         return $this->password;
-    }
-
-    /**
-     * Set familyId
-     *
-     * @param integer $familyId
-     * @return Member
-     */
-    public function setFamilyId($familyId)
-    {
-        $this->familyId = $familyId;
-
-        return $this;
-    }
-
-    /**
-     * Get familyId
-     *
-     * @return integer 
-     */
-    public function getFamilyId()
-    {
-        return $this->familyId;
     }
 
     /**
@@ -214,7 +189,28 @@ class Member
         return $this->login;
     }
 
+    /**
+     * Set family
+     *
+     * @param \Acme\EcoBundle\Entity\Family $family
+     * @return Member
+     */
+    public function setFamily(\Acme\EcoBundle\Entity\Family $family = null)
+    {
+        $this->family = $family;
 
+        return $this;
+    }
+
+    /**
+     * Get family
+     *
+     * @return \Acme\EcoBundle\Entity\Family 
+     */
+    public function getFamily()
+    {
+        return $this->family;
+    }
 
     /**
      * Add transactions
@@ -247,5 +243,28 @@ class Member
     public function getTransactions()
     {
         return $this->transactions;
+    }
+
+    /**
+     * Set isDeleted
+     *
+     * @param integer $isDeleted
+     * @return Member
+     */
+    public function setIsDeleted($isDeleted)
+    {
+        $this->isDeleted = $isDeleted;
+
+        return $this;
+    }
+
+    /**
+     * Get isDeleted
+     *
+     * @return integer 
+     */
+    public function getIsDeleted()
+    {
+        return $this->isDeleted;
     }
 }

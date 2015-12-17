@@ -6,6 +6,7 @@ use Acme\EcoBundle\Entity\Category;
 use Acme\EcoBundle\Entity\NewFamily;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Acme\EcoBundle\Entity\Transaction;
+use Acme\EcoBundle\Entity\TransactionType;
 use Acme\EcoBundle\Entity\Member;
 use Acme\EcoBundle\Entity\Family;
 use Acme\EcoBundle\Entity\NewMember;
@@ -26,6 +27,11 @@ class TransactionController extends Controller
         return $item = preg_replace('/[^0-9]/iu', '', $item);
     }
 
+    public function onlyFloat($item)
+    {
+        return $item = preg_replace('/[^0-9.]/iu', '', $item);
+    }
+
     public function onlyNumeralAndString($item)
     {
         return $item = preg_replace('/[^a-zа-я0-9 ]/iu', '', $item);
@@ -36,62 +42,214 @@ class TransactionController extends Controller
         return $item = preg_replace('/[^-0-9]/iu', '', $item);
     }
 
-    //  Создадим новую категорию транзакции
+    public function onlyBoolean($item)
+    {
+        return filter_var($item, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    //  Создадим новый тип транзакции
+    public function newTransactionTypeAction(Request $request)
+    {
+        $typeName = $this->onlyNumeralAndString(
+            $request->request->get('typeName')
+        );
+
+        $type = $this->onlyBoolean($request->request->get('type'));
+
+        if($typeName){
+
+            $familyId = $this->get('session')->get('fmId');
+
+                $em = $this->getDoctrine()->getEntityManager();
+                $query = $em->createQuery(
+                    'SELECT t.typeName
+                      FROM AcmeEcoBundle:TransactionType t
+                      WHERE t.typeName = :typeName
+                      AND t.isDeleted = false
+                      AND t.family = :familyId'
+                )->setParameters(array(
+                    'typeName' => $typeName,
+                    'familyId' => $familyId
+                ));
+                $exist = $query->getResult();
+
+            if(!$exist){
+                $family = $this->getDoctrine()
+                    ->getRepository('AcmeEcoBundle:Family')
+                    ->find($familyId);
+
+                $transactionType = new TransactionType();
+                $transactionType->setTypeName($typeName);
+                $transactionType->setType($type);
+                $transactionType->setIsDeleted(false);
+                $transactionType->setFamily($family);
+
+                $em = $this->getDoctrine()->getEntityManager();
+                $em->persist($family);
+                $em->persist($transactionType);
+                $em->flush();
+
+                return new Response('Ok!');
+            }else{
+                return new Response('Bad!');
+            }
+        }else{
+            return new Response('Bad inputs!');
+        }
+    }
+
+    //  Удаление типа транзакции
+    public function deleteTransactionTypeAction(Request $request)
+    {
+        $typeId = $this->onlyNumeral($request->request->get('typeId'));
+
+        $em = $this->getDoctrine()->getEntityManager();
+
+        $deleteTransactionType = $this->getDoctrine()
+            ->getRepository('AcmeEcoBundle:TransactionType')
+            ->find($typeId);
+
+        $deleteTransactionType->setIsDeleted(true);
+
+        $em->flush();
+
+        return new Response('Ok!');
+    }
+
+    //  Создание списка всех типов транзакций
+    public function listTransactionTypeAction(Request $request)
+    {
+        $familyId = $this->get('session')->get('fmId');
+
+            $em = $this->getDoctrine()->getEntityManager();
+            $query = $em->createQuery(
+                'SELECT t.typeId,
+                        t.typeName,
+                        t.type
+                  FROM AcmeEcoBundle:TransactionType t
+                  WHERE t.family = :familyId
+                  AND t.isDeleted = false'
+            )->setParameters(array(
+                'familyId' => $familyId,
+            ));
+        $listTransactionType = $query->getResult();
+
+        if($listTransactionType){
+            $count = count($listTransactionType);
+            for ($i = 0; $i < $count; $i++) {
+                $listTransactionType{$i} = $listTransactionType[$i];
+            }
+
+            return new Response(json_encode($listTransactionType));
+        }else{
+            return new Response('Bad!');
+        }
+    }
+
+    //  Информация по одному типу транзакции
+    public function showTransactionTypeAction(Request $request)
+    {
+        $familyId = $this->get('session')->get('fmId');
+
+        $typeId = $this->onlyNumeral($request->request->get('typeId'));
+
+        $em = $this->getDoctrine()->getEntityManager();
+        $query = $em->createQuery(
+            'SELECT t.typeId,
+                    t.typeName,
+                    t.type
+                  FROM AcmeEcoBundle:TransactionType t
+                  WHERE t.family = :familyId
+                  AND t.typeId = :typeId
+                  AND t.isDeleted = false'
+        )->setParameters(array(
+            'typeId' => $typeId,
+            'familyId' => $familyId,
+        ));
+        $showTransactionType = $query->getResult();
+
+        if($showTransactionType) {
+            $count = count($showTransactionType);
+            for ($i = 0; $i < $count; $i++) {
+                $showTransactionType{$i} = $showTransactionType[$i];
+            }
+            return new Response(json_encode($showTransactionType));
+        }else{
+            return new Response('Bad!');
+        }
+    }
+
+    //  Изменение типаТранзакции
+    public function changeTransactionTypeAction(Request $request)
+    {
+        $typeId = $this->onlyNumeral(
+            $request->request->get('typeId')
+        );
+
+        $typeName = $this->onlyNumeralAndString(
+            $request->request->get('typeName')
+        );
+
+        $type = $this->onlyBoolean(
+            $request->request->get('type')
+        );
+
+        if($typeName && $typeId){
+            $changeTransactionType = $this->getDoctrine()
+                ->getRepository('AcmeEcoBundle:TransactionType')
+                ->find($typeId);
+
+            $changeTransactionType->setTypeName($typeName);
+            $changeTransactionType->setType($type);
+            $em = $this->getDoctrine()->getEntityManager();
+            $em->flush();
+
+            return new Response('Ok!');
+        }else{
+            return new Response('Bad inputs!');
+        }
+    }
+
+
+
+    //  Создание новой категории транзакции
     public function newCategoryAction(Request $request)
     {
         $categoryName = $this->onlyNumeralAndString(
             $request->request->get('categoryName')
         );
 
-        $categoryType = $this->onlyString(
-            $request->request->get('categoryType')
-        );
-
         if($categoryName){
-
             $familyId = $this->get('session')->get('fmId');
-            $memberId = $this->get('session')->get('memId');
 
-            if($familyId){
                 $em = $this->getDoctrine()->getEntityManager();
                 $query = $em->createQuery(
                     'SELECT c.categoryId FROM AcmeEcoBundle:Category c
                   WHERE c.categoryName = :categoryName
-                  AND c.familyId = :familyId'
+                   AND c.isDeleted = 0
+                  AND c.family = :familyId'
                 )->setParameters(array(
                     'categoryName' => $categoryName,
                     'familyId' => $familyId
                 ));
                 $exist = $query->getResult();
-            }else{
-                $em = $this->getDoctrine()->getEntityManager();
-                $query = $em->createQuery(
-                    'SELECT c.categoryId FROM AcmeEcoBundle:Category c
-                  WHERE c.categoryName = :categoryName
-                  AND c.memberId = :memberId'
-                )->setParameters(array(
-                    'categoryName' => $categoryName,
-                    'memberId' => $memberId
-                ));
-                $exist = $query->getResult();
-            }
-
-
 
             if(!$exist){
+
+                $family = $this->getDoctrine()
+                    ->getRepository('AcmeEcoBundle:Family')
+                    ->find($familyId);
+
                 $category = new Category();
 
                 $category->setCategoryName($categoryName);
-                $category->setCategoryType($categoryType);
-                if($familyId)$category->setFamilyId($familyId);
-                $category->setMemberId($memberId);
-
-                $em = $this->getDoctrine()->getEntityManager();
+                $category->setFamily($family);
+                $category->setIsDeleted(false);
                 $em->persist($category);
                 $em->flush();
-//
+
                 return new Response('Ok!');
-//                return new Response(var_dump($exist));
+
             }else{
                 return new Response('Bad!');
             }
@@ -111,11 +269,39 @@ class TransactionController extends Controller
             ->getRepository('AcmeEcoBundle:Category')
             ->find($categoryId);
 
-        $em->remove($deleteCategory);
+        $deleteCategory->setIsDeleted(true);
 
         $em->flush();
 
         return new Response('Ok!');
+    }
+
+    //  Создание списка категорий
+    public function listCategoryAction(Request $request)
+    {
+        $familyId = $this->get('session')->get('fmId');
+
+            $em = $this->getDoctrine()->getEntityManager();
+            $query = $em->createQuery(
+                'SELECT c.categoryId,
+                        c.categoryName
+                  FROM AcmeEcoBundle:Category c
+                  WHERE c.family = :familyId AND c.isDeleted = false'
+            )->setParameters(array(
+                'familyId' => $familyId,
+            ));
+        $listCategory = $query->getResult();
+
+        if($listCategory){
+            $count = count($listCategory);
+            for ($i = 0; $i < $count; $i++) {
+                $listCategory{$i} = $listCategory[$i];
+            }
+
+            return new Response(json_encode($listCategory));
+        }else{
+            return new Response('Bad!');
+        }
     }
 
     //  Изменение категории транзакции
@@ -129,17 +315,12 @@ class TransactionController extends Controller
             $request->request->get('categoryName')
         );
 
-        $categoryType = $this->onlyString(
-            $request->request->get('categoryType')
-        );
-
-        if($categoryId && $categoryName && $categoryType){
+        if($categoryId && $categoryName){
             $changeCategory = $this->getDoctrine()
                 ->getRepository('AcmeEcoBundle:Category')
                 ->find($categoryId);
 
             $changeCategory->setCategoryName($categoryName);
-            $changeCategory->setCategoryType($categoryType);
             $em = $this->getDoctrine()->getEntityManager();
             $em->flush();
 
@@ -149,69 +330,23 @@ class TransactionController extends Controller
         }
     }
 
-    //  Создание списка категорий
-    public function listCategoryAction(Request $request)
-    {
-        $familyId = $this->get('session')->get('fmId');
-        $memberId = $this->get('session')->get('memId');
-
-        //  Если есть семья у пользователя, то загружаем категории для семьи
-        if ($familyId) {
-            $em = $this->getDoctrine()->getEntityManager();
-            $query = $em->createQuery(
-                'SELECT t.categoryId,
-                        t.categoryName,
-                        t.categoryType,
-                        t.familyId,
-                        t.memberId
-                  FROM AcmeEcoBundle:Category t WHERE t.familyId = :familyId OR t.memberId = :memberId'
-            )->setParameters(array(
-                'familyId' => $familyId,
-                'memberId' => $memberId,
-            ));
-            //  Если семьи нет загружаем категории самого пользователя
-        } else {
-            $em = $this->getDoctrine()->getEntityManager();
-            $query = $em->createQuery(
-                'SELECT t.categoryId,
-                        t.categoryName,
-                        t.categoryType,
-                        t.memberId,
-                        t.familyId
-                  FROM AcmeEcoBundle:Category t WHERE t.memberId = :memberId'
-            )->setParameters(array(
-                'memberId' => $memberId,
-            ));
-        }
-        $listCategory = $query->getResult();
-
-        if($listCategory){
-            $count = count($listCategory);
-            for ($i = 0; $i < $count; $i++) {
-                $listCategory{$i} = $listCategory[$i];
-            }
-
-            return new Response(json_encode($listCategory));
-        }else{
-            return new Response(null);
-        }
-    }
-
     //  Информация по одной категории
     public function showCategoryAction(Request $request)
     {
         $categoryId = $this->onlyNumeral($request->request->get('categoryId'));
+        $familyId = $this->get('session')->get('fmId');
+
         $em = $this->getDoctrine()->getEntityManager();
         $query = $em->createQuery(
             'SELECT c.categoryId,
-                    c.categoryName,
-                    c.categoryType,
-                    c.familyId,
-                    c.memberId
+                    c.categoryName
               FROM AcmeEcoBundle:Category c
-              WHERE c.categoryId = :categoryId'
+              WHERE c.categoryId = :categoryId
+              AND c.family =:familyId
+              AND c.isDeleted = false'
         )->setParameters(array(
             'categoryId' => $categoryId,
+            'familyId' => $familyId,
         ));
         $showCategory = $query->getResult();
 
@@ -226,26 +361,49 @@ class TransactionController extends Controller
     //  Создание новой транзакции
     public function newTransactionAction(Request $request)
     {
-        $transactionName = $this->onlyNumeralAndString($request->request->get('transactionName'));
-        $transactionType = $this->onlyString($request->request->get('transactionType'));
-        $sum = $this->onlyNumeral($request->request->get('sum'));
+        $categoryId = $this->onlyNumeral($request->request->get('categoryId'));
+//        $type = $this->onlyBoolean($request->request->get('type'));
+        $typeId = $this->onlyNumeral($request->request->get('typeId'));
+        $sum = $this->onlyFloat($request->request->get('sum'));
         $date = $this->onlyDate($request->request->get('date'));
         $date = date_create_from_format('Y-m-d', $date);
 
         $memberId = $this->get('session')->get('memId');
         $familyId = $this->get('session')->get('fmId');
 
-        if($transactionName && $transactionType && $sum && $date){
+        if($categoryId && $sum && $date){
+            $family = $this->getDoctrine()
+                ->getRepository('AcmeEcoBundle:Family')
+                ->find($familyId);
+
+            $transactionCategory = $this->getDoctrine()
+                ->getRepository('AcmeEcoBundle:Category')
+                ->find($categoryId);
+
+            $transactionType = $this->getDoctrine()
+                ->getRepository('AcmeEcoBundle:TransactionType')
+                ->find($typeId);
+
+            $member = $this->getDoctrine()
+                ->getRepository('AcmeEcoBundle:Member')
+                ->find($memberId);
+
+
             $trasaction = new Transaction();
 
-            $trasaction->setTransactionName($transactionName);
-            $trasaction->setTransactionType($transactionType);
-            $trasaction->setSum((int)$sum);
+            $trasaction->setSum($sum);
             $trasaction->setDate($date);
-            $trasaction->setMemberId($memberId);
-            $trasaction->setFamilyId($familyId);
+            $trasaction->setIsDeleted(false);
+            $trasaction->setCategory($transactionCategory);
+            $trasaction->setType($transactionType);
+            $trasaction->setMember($member);
+            $trasaction->setFamily($family);
 
             $em = $this->getDoctrine()->getEntityManager();
+            $em->persist($family);
+            $em->persist($transactionCategory);
+            $em->persist($transactionType);
+            $em->persist($member);
             $em->persist($trasaction);
             $em->flush();
 
@@ -259,24 +417,51 @@ class TransactionController extends Controller
     public function changeTransactionAction(Request $request)
     {
         $transactionId = $this->onlyNumeral($request->request->get('transactionId'));
-        $transactionName = $this->onlyNumeralAndString($request->request->get('transactionName'));
-        $transactionType = $this->onlyString($request->request->get('transactionType'));
-        $sum = $this->onlyNumeral($request->request->get('sum'));
+        $categoryId = $this->onlyNumeral($request->request->get('categoryId'));
+        $typeId = $this->onlyNumeral($request->request->get('typeId'));
+        $memberId = $this->onlyNumeral($request->request->get('memberId'));
+        $sum = $this->onlyFloat($request->request->get('sum'));
         $date = $this->onlyDate($request->request->get('date'));
         $date = date_create_from_format('Y-m-d', $date);
 
-        if($transactionId && $transactionName && $transactionType && $sum && $date){
-            $changeTransaction = $this->getDoctrine()
+        $familyId = $this->get('session')->get('fmId');
+
+        if($transactionId && $categoryId && $typeId && $sum && $date){
+            $family = $this->getDoctrine()
+                ->getRepository('AcmeEcoBundle:Family')
+                ->find($familyId);
+
+            $transactionCategory = $this->getDoctrine()
+                ->getRepository('AcmeEcoBundle:Category')
+                ->find($categoryId);
+
+            $transactionType = $this->getDoctrine()
+                ->getRepository('AcmeEcoBundle:TransactionType')
+                ->find($typeId);
+
+            $member = $this->getDoctrine()
+                ->getRepository('AcmeEcoBundle:Member')
+                ->find($memberId);
+
+
+            $trasaction = $this->getDoctrine()
                 ->getRepository('AcmeEcoBundle:Transaction')
                 ->find($transactionId);
 
-            $changeTransaction->setTransactionName($transactionName);
-            $changeTransaction->setTransactionType($transactionType);
-            $changeTransaction->setSum((int)$sum);
-            $changeTransaction->setDate($date);
+            $trasaction->setSum($sum);
+            $trasaction->setDate($date);
+            $trasaction->setIsDeleted(false);
+            $trasaction->setCategory($transactionCategory);
+            $trasaction->setType($transactionType);
+            $trasaction->setMember($member);
+            $trasaction->setFamily($family);
 
             $em = $this->getDoctrine()->getEntityManager();
-            $em->persist($changeTransaction);
+            $em->persist($family);
+            $em->persist($transactionCategory);
+            $em->persist($transactionType);
+            $em->persist($member);
+            $em->persist($trasaction);
             $em->flush();
 
             return new Response('Ok!');
@@ -288,6 +473,7 @@ class TransactionController extends Controller
     //  Удаление транзакции
     public function deleteTransactionAction(Request $request)
     {
+
         $transactionId = $this->onlyNumeral($request->request->get('transactionId'));
 
         $deleteTransaction = $this->getDoctrine()
@@ -295,7 +481,7 @@ class TransactionController extends Controller
             ->find($transactionId);
 
         $em = $this->getDoctrine()->getEntityManager();
-        $em->remove($deleteTransaction);
+        $deleteTransaction->setIsDeleted(true);
         $em->flush();
         return new Response('Ok!');
     }
@@ -304,45 +490,32 @@ class TransactionController extends Controller
     public function listTransactionAction(Request $request)
     {
         $who = null; $id = null;
-        //  Если запрашивается определнный человек who и id не будут null
-        //  в других случаях, подразумевается, что запрос всех транзакции
+
         $memberId = $this->onlyNumeral($request->request->get('memberId'));
-        $familyId = $this->onlyNumeral($request->request->get('familyId'));
+        $familyId = $this->get('session')->get('fmId');
 
-
+        //  Если запрос на конкретного человека получаем memeberId
         if($memberId){
-            $who = 'memberId'; $id = $memberId;
-        }elseif($familyId){
-            $who = 'familyId'; $id = $familyId;
+            $who = 'member';
+            $id = $memberId;
+        }else {
+            $who = 'family';
+            $id = $familyId;
         }
 
-
-        if($who && $id){
             $em = $this->getDoctrine()->getEntityManager();
             $query = $em->createQuery(
-                'SELECT t.transactionId, t.transactionName, t.sum,
-                        t.transactionType,t.memberId, t.familyId,t.date
+                'SELECT t.transactionId,t.sum,t.date,tt.typeName,tt.type, c.categoryName, m.name
                   FROM AcmeEcoBundle:Transaction t
-                  WHERE t.'.$who.' = :id'
+                  join AcmeEcoBundle:TransactionType tt WITH t.type = tt.typeId
+                  join AcmeEcoBundle:Category c WITH t.category = c.categoryId
+                  join AcmeEcoBundle:Member m WITH t.member = m.memberId
+                  WHERE t.'.$who.' = :id
+                  AND t.isDeleted = false'
             )->setParameters(array(
                 'id' => $id,
             ));
-        }else{
-            //  Если запрос был пустым, находим все транзакции
-            $memberId = $this->get('session')->get('memId');
-            $familyId = $this->get('session')->get('fmId');
 
-            $em = $this->getDoctrine()->getEntityManager();
-            $query = $em->createQuery(
-                'SELECT t.transactionId, t.transactionName, t.sum,
-                        t.transactionType,t.memberId, t.familyId,t.date
-                  FROM AcmeEcoBundle:Transaction t
-                  WHERE t.familyId = :familyId OR t.memberId = :memberId'
-            )->setParameters(array(
-                'familyId' => $familyId,
-                'memberId' => $memberId,
-            ));
-        }
         $listTransaction = $query->getResult();
 
         //  Если транзакций нет, возвращаем null
@@ -351,74 +524,28 @@ class TransactionController extends Controller
             for ($i = 0; $i < $count; $i++) {
                 $listTransaction{$i} = $listTransaction[$i];
             }
-
             return new Response(json_encode($listTransaction));
-            return new Response(var_dump($listTransaction));
         } else {
-            return new Response(null);
+            return new Response('Bad!');
         }
-
-
-
-
-
-
-//        //  Если запрашивается определнный человек who и id не будут null
-//        $who = $this->onlyString($request->request->get('who'));
-//        $id = $this->onlyNumeral($request->request->get('id'));
-//        //  В других случаях, подразумевается, что запрос всех транзакции
-//        $memberId = $this->get('session')->get('memId');
-//        $familyId = $this->get('session')->get('fmId');
-//
-//        if($who && $id){
-//            $em = $this->getDoctrine()->getEntityManager();
-//            $query = $em->createQuery(
-//                'SELECT t.transactionId, t.transactionName, t.sum,
-//                        t.transactionType,t.memberId, t.familyId,t.date
-//                  FROM AcmeEcoBundle:Transaction t
-//                  WHERE t.'.$who.' = :id'
-//            )->setParameters(array(
-//                'id' => $id,
-//            ));
-//        }else{
-//            $em = $this->getDoctrine()->getEntityManager();
-//            $query = $em->createQuery(
-//                'SELECT t.transactionId, t.transactionName, t.sum,
-//                        t.transactionType,t.memberId, t.familyId,t.date
-//                  FROM AcmeEcoBundle:Transaction t
-//                  WHERE t.familyId = :familyId OR t.memberId = :memberId'
-//            )->setParameters(array(
-//                'familyId' => $familyId,
-//                'memberId' => $memberId,
-//            ));
-//        }
-//        $listTransaction = $query->getResult();
-//
-//        //  Если транзакций нет, возвращаем null
-//        if ($listTransaction) {
-//            $count = count($listTransaction);
-//            for ($i = 0; $i < $count; $i++) {
-//                $listTransaction{$i} = $listTransaction[$i];
-//            }
-//
-//            return new Response(json_encode($listTransaction));
-//        } else {
-//            return new Response(null);
-//        }
     }
 
     //  Информация по отдельной транзакции
     public function showTransactionAction(Request $request)
     {
         $transactionId = $this->onlyNumeral($request->request->get('transactionId'));
-        $transactionId = 47;
 
         $em = $this->getDoctrine()->getEntityManager();
         $query = $em->createQuery(
-            'SELECT t.transactionId, t.transactionName, t.sum,
-                    t.transactionType,t.memberId, t.familyId,t.date
-              FROM AcmeEcoBundle:Transaction t
-              WHERE t.transactionId = :transactionId'
+            'SELECT t.transactionId,t.sum,t.date,
+                    c.categoryId, c.categoryName,
+                    tt.typeId,tt.typeName,m.memberId
+                  FROM AcmeEcoBundle:Transaction t
+                  join AcmeEcoBundle:TransactionType tt WITH t.type = tt.typeId
+                  join AcmeEcoBundle:Category c WITH t.category = c.categoryId
+                  join AcmeEcoBundle:Member m WITH t.member = m.memberId
+                  WHERE t.transactionId = :transactionId
+                  AND t.isDeleted = false'
         )->setParameters(array(
             'transactionId' => $transactionId,
         ));
@@ -429,6 +556,52 @@ class TransactionController extends Controller
             $showTransaction{$i} = $showTransaction[$i];
         }
         return new Response(json_encode($showTransaction));
+    }
+
+    public function demoAction(Request $request)
+    {
+        $memberId = $this->get('session')->get('memId');
+        $familyId = $this->get('session')->get('fmId');
+
+            $family = $this->getDoctrine()
+                ->getRepository('AcmeEcoBundle:Family')
+                ->find($familyId);
+
+            $transactionCategory = new Category();
+            $transactionCategory->setIsDeleted(false);
+            $transactionCategory->setFamily($family);
+            $transactionCategory->setCategoryName('Свет');
+
+            $transactionType = new TransactionType();
+            $transactionType->setIsDeleted(false);
+            $transactionType->setFamily($family);
+            $transactionType->setType(false);
+            $transactionType->setTypeName('Оплата ЖКХ');
+
+            $member = $this->getDoctrine()
+                ->getRepository('AcmeEcoBundle:Member')
+                ->find($memberId);
+
+
+            $trasaction = new Transaction();
+
+            $trasaction->setSum('2200');
+            $trasaction->setDate(new \DateTime('today'));
+            $trasaction->setIsDeleted(false);
+            $trasaction->setCategory($transactionCategory);
+            $trasaction->setType($transactionType);
+            $trasaction->setMember($member);
+            $trasaction->setFamily($family);
+
+            $em = $this->getDoctrine()->getEntityManager();
+            $em->persist($family);
+            $em->persist($transactionCategory);
+            $em->persist($transactionType);
+            $em->persist($member);
+            $em->persist($trasaction);
+            $em->flush();
+
+            return new Response('Ok!');
     }
 
 }

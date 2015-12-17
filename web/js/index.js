@@ -9,12 +9,8 @@ $(document).ready(function () {
         ));
         return matches ? decodeURIComponent(matches[1]) : undefined;
     }
-
-    if(getCookie('familyId')){
-        $('.buttonNewFamily').toggleClass("hide");
-    }else{
-        $('.buttonNewMember').toggleClass("hide");
-    }
+    var userName;
+    var userFamily;
 
     loadDB();
 //  Подгрузка данных из БД
@@ -23,16 +19,15 @@ $(document).ready(function () {
             showListTransaction();
             showListCategory();
             showListMember();
-            showContent()
+            showlistTransactionType();
+            report1();
         }
     }
 
-
-    function showContent(){
-        //$('.reports').fadeToggle("slow").toggleClass("hide");
-        //$('.transaction').fadeToggle("slow").toggleClass("hide");
-        //$('.family').fadeToggle("slow").toggleClass("hide");
-        //$('.logOut').fadeToggle("slow").toggleClass("hide");
+    //  StopSpam предотвращение множественного нажатия
+    function prevSpamming(target, time){
+        setTimeout(function(){$(''+target+'').attr('disabled', false);},time);  // Предотвращаем множественные нажатия
+        $(''+target+'').attr('disabled', true);
 
     }
 
@@ -53,6 +48,7 @@ $(document).ready(function () {
 
 //  Авторизация пользователя
     $('.agreeLogin').on("click", function () {
+        prevSpamming('.agreeLogin',2000);
         var login = $('#form_login').val();
         var password = $('#form_password').val();
         $.ajax({
@@ -73,6 +69,7 @@ $(document).ready(function () {
 
 //  Регистрация пользователя
     $('.AgreeRegistration').on("click", function () {
+        prevSpamming('.AgreeRegistration',2000);
         var surname = $('#form_surname').val();
         var name = $('#form_name').val();
         var secondname = $('#form_secondname').val();
@@ -91,11 +88,11 @@ $(document).ready(function () {
             success: function (msg) {
                 //console.log(msg);
                 if (msg == 'Ok!') {
+
                     $('.showRegistration, .shirm, .auth')
                         .fadeToggle("slow");
-                    $('.membersList')
-                        .fadeToggle("slow");
-                    //location.reload()
+                    showListMember();
+                    showListTransaction()
                 } else {
                     if(msg == 'Login already exist!'){
                         alert('Такой логин уже существует!');
@@ -106,31 +103,6 @@ $(document).ready(function () {
             }
         });
     });
-
-//  Отображение формы: Создание новой семьи
-    $('.buttonNewFamily').on("click", function () {
-        $('.newFamily, .shirm').fadeToggle("slow");
-    });
-
-//  Создание новой семьи
-    $('.agreeNewFamily').on("click", function () {
-        var familyName = $('#form_login3').val();
-        var memberId = getCookie('memberId');
-        $.ajax({
-            type: "POST",
-            data: {familyName: familyName, memberId: memberId},
-            url: "/web/app_dev.php/newFamily",
-            success: function (msg) {
-                if(msg == 'Ok!'){
-                    $('.newFamily, .shirm').fadeToggle("slow");
-                    showListMember();
-                }else{
-                    alert('Некорректное имя семьи');
-                }
-            }
-        });
-    });
-
 
 //  Отобразить форму login
     $('.login').on("click", function () {
@@ -146,10 +118,12 @@ $(document).ready(function () {
 //  Отображение формы: Создание нового члена семьи
     $('.buttonNewMember').on("click", function () {
         $('.newMember, .shirm').fadeToggle("slow");
+        $('#form_surname4').val(userFamily);
     });
 
 //  Создание нового члена семьи
     $('.agreeNewMember').on("click", function () {
+        prevSpamming('.agreeNewMember',2000);
         var surname = $('#form_surname4').val();
         var name = $('#form_name4').val();
         var secondname = $('#form_secondname4').val();
@@ -205,8 +179,18 @@ $(document).ready(function () {
                         );
                 }
 
-                //  Заполнение выпадающего списка
+
                 if(msg)jQuery.parseJSON(msg).forEach(function (val, i) {
+
+                    //  Заполнение строки wellcome user!
+                    if(val.memberId == getCookie('memberId')){
+                        wellcome = 'Добро пожаловать, '+val.name+'!';
+                        $('.wellcome').text(wellcome);
+                        userFamily = val.surname;
+                        userName = val.name;
+                    }
+
+                    //  Заполнение выпадающего списка
                     $('.chooseMember, .chooseMember1, .chooseMember2')
                         .append(
                             '<option value="memberId=' + val.memberId + '">'+val.name+''+
@@ -248,8 +232,9 @@ $(document).ready(function () {
                 success: function (msg) {
                     stringMember.remove();
                     if(msg == 'Bye!'){location.reload();}
+                    showListMember();
+                    //showListTransaction();
                     //if(getCookie('memberId')==memberId){location.reload()}
-
                 }
             });
         }
@@ -258,6 +243,7 @@ $(document).ready(function () {
 //  Изменение личных данных члена семьи
     $('.membersList').on("click", " .buttonChangeMember", function (event) {
         var memberId = $(event.target).closest('button.buttonChangeMember')[0].name;
+        prevSpamming('.buttonChangeMember',2000);
 
         $.ajax({
             type: "POST",
@@ -273,9 +259,11 @@ $(document).ready(function () {
                     $('#form_name5').val(val.name);
                     $('#form_secondname5').val(val.secondname);
                     $('#form_login5').val(val.login);
+                    $('#form_password5').val(null);
                 });
 
                 $('.agreeChangeMember').on("click", function () {
+                    prevSpamming('.agreeChangeMember',2000);
                     surname = $('#form_surname5').val();
                     name = $('#form_name5').val();
                     secondname = $('#form_secondname5').val();
@@ -295,6 +283,7 @@ $(document).ready(function () {
                         success: function (msg) {
                             if(msg == 'Ok!'){
                                 showListMember();
+                                showListTransaction();
                                 $('.changeMember, .shirm').fadeToggle('slow');
                             }else{
                                 alert('Некорректные данные!');
@@ -307,32 +296,114 @@ $(document).ready(function () {
 
     });
 
-//  Добавляем новую транзакцию
-    $('.agreeTransaction').on("click", function () {
-        var transactionName = $('#form_transaction').val();
-        var transactionType = $('#form_typeTransaction').val();
-        var sum = $('#form_sumTransaction').val();
-        var date = $('#datepickerTransaction').val();
-        var memberId = getCookie('memberId');
-        var familyId = getCookie('familyId');
 
+
+//  Добавляем новый ТИП транзакции
+    $('.agreeType').on("click", function () {
+        var typeName = $('#form_typeName').val();
+        var type = $('#form_type').val();
+        //console.log(type,typeName);
         $.ajax({
             type: "POST",
-            url: "/web/app_dev.php/newTransaction",
-            data: {
-                transactionName: transactionName,
-                transactionType: transactionType,
-                sum: sum,
-                date: date,
-                memberId: memberId,
-                familyId: familyId
-            },
+            url: "/web/app_dev.php/newTransactionType",
+//                traditional: true,
+            data: {typeName: typeName, type: type},
             success: function (msg) {
                 if(msg == 'Ok!'){
-                    showListTransaction()
+                    showlistTransactionType();
                 }else{
-                    alert('Некорректные данные!');
+                    if(msg == 'Bad inputs!'){
+                        alert('Некооректные данные!');
+                    }else{
+                        alert('Такой тип уже существует!');
+                    }
                 }
+            }
+        });
+    });
+
+    //  Отображение списка ТИПОВ транзакций
+    function showlistTransactionType() {
+        var memberId = getCookie('memberId');
+        var familyId = getCookie('familyId');
+        $.ajax({
+            type: "POST",
+            data: {memberId: memberId, familyId: familyId},
+            url: "/web/app_dev.php/listTransactionType",
+            success: function (msg) {
+                //console.log(msg);
+                $('.typesList, #form_chooseType, #form_chooseType2').html('');
+                if(msg !== 'Bad!')jQuery.parseJSON(msg).forEach(function (val, i) {
+                    $('.typesList').append('<p data-id="' + val.typeId + '" data-typeName="'+val.typeName+'" class="' + val.type + ' diagramTransactionType"><button data-id="' + val.typeId + '" class="deleteType"><img class="buttons" src="/web/images/Delete-24.png"></button><button data-id="' + val.typeId + '" class="changeType"><img class="buttons" src="/web/images/Pencil-24.png"></button>  ' + val.typeName + '</p>');
+                    $('#form_chooseType, #form_chooseType2').append('<option data-id="' + val.typeId + '" data-typeName="'+val.typeName+'" class="' + val.type + '">' + val.typeName + '</option>');
+                });
+            }
+        });
+    }
+
+    //  Удаление ТИПА транзакции
+    $('.typesList').on("click", " .deleteType", function (event) {
+        var typeId = $(event.target).closest('button.deleteType').data('id');
+        var stringCategory = $(event.target).closest('p');
+        //console.log($(event.target).closest('button.deleteCategory'));
+        $.ajax({
+            type: "POST",
+            data: {typeId: typeId},
+            url: "/web/app_dev.php/deleteTransactionType",
+            success: function (msg) {
+                //stringCategory.remove();
+                //console.log(memberId);
+                showlistTransactionType()
+            }
+        });
+    });
+
+
+
+    //  Изменение ТИПА транзакции
+    $('.type').on("click", " .changeType", function (event) {
+        $('.formChangeType, .shirm').fadeToggle("slow");
+        var typeId = $(event.target).closest('button.changeType').data('id');
+        prevSpamming('.changeType',2000);
+        //console.log($(event.target).closest('button.changeType').data('id'));
+        $.ajax({
+            type: "POST",
+            data: {typeId: typeId},
+            url: "/web/app_dev.php/showTransactionType",
+            success: function (msg) {
+                val=jQuery.parseJSON(msg)[0];
+                //console.log(jQuery.parseJSON(msg)[0]);
+                $('#form_changeTypeName').val(val.typeName);
+                if(val.type){
+                    $('#form_changeType').val("true");
+                }else{
+                    $('#form_changeType').val("false");
+                }
+
+                $('.agreeChangeType').on("click", function () {
+                    prevSpamming('.agreeChangeType',2000);
+                    var typeName = $('#form_changeTypeName').val();
+                    var type = $('#form_changeType').val();
+                    $.ajax({
+                        type: "POST",
+                        url: "/web/app_dev.php/changeTransactionType",
+                        data: {
+                            typeName: typeName,
+                            type: type,
+                            typeId: typeId
+                        },
+                        success: function (msg) {
+                            if (msg == 'Ok!') {
+                                $('.formChangeType,.shirm')
+                                    .fadeToggle("slow");
+                                showlistTransactionType();
+                                showListTransaction();
+                            } else {
+                                alert('Некорректные данные!');
+                            }
+                        }
+                    });
+                });
             }
         });
     });
@@ -341,13 +412,12 @@ $(document).ready(function () {
     $('.agreeCategory').on("click", function () {
         var categoryName = $('#form_category').val();
         var categoryType = $('#form_typeCategory').val();
-        var memberId = getCookie('memberId');
         var familyId = getCookie('familyId');
         $.ajax({
             type: "POST",
             url: "/web/app_dev.php/newCategory",
 //                traditional: true,
-            data: {categoryName: categoryName, categoryType: categoryType, memberId: memberId, familyId: familyId},
+            data: {categoryName: categoryName, categoryType: categoryType, familyId: familyId},
             success: function (msg) {
                 if(msg == 'Ok!'){
                     showListCategory();
@@ -364,22 +434,20 @@ $(document).ready(function () {
 
 //  Отображение списка категорий
     function showListCategory() {
-        var memberId = getCookie('memberId');
         var familyId = getCookie('familyId');
         $.ajax({
             type: "POST",
-            data: {memberId: memberId, familyId: familyId},
+            data: {familyId: familyId},
             url: "/web/app_dev.php/listCategory",
             success: function (msg) {
                 //console.log(msg);
-                $('.categoryList, #Categories').html('');
-                if(msg)jQuery.parseJSON(msg).forEach(function (val, i) {
-                    $('.categoryList').append('<p data-id="' + val.categoryId + '" data-categoryName="' + val.categoryName + '" data-categoryType="' + val.categoryType + '" data-familyId="' + val.familyId + '" data-memberId="' + val.memberId + '" class="' + val.categoryType + '"><button data-id="' + val.categoryId + '" class="deleteCategory"><img class="buttons" src="/web/images/Delete-24.png"></button><button data-id="' + val.categoryId + '" class="changeCategory"><img class="buttons" src="/web/images/Pencil-24.png"></button>  ' + val.categoryName + '</p>');
-                    $('#Categories').append('<option>' + val.categoryName + '</option>');
+                $('.categoryList, #form_chooseCategory, #form_chooseCategory2').html('');
+                if(msg !== 'Bad!')jQuery.parseJSON(msg).forEach(function (val, i) {
+                    $('.categoryList').append('<p data-id="' + val.categoryId + '" data-categoryName="' + val.categoryName +'" class="diagramCategory"><button data-id="' + val.categoryId + '" class="deleteCategory"><img class="buttons" src="/web/images/Delete-24.png"></button><button data-id="' + val.categoryId + '" class="changeCategory"><img class="buttons" src="/web/images/Pencil-24.png"></button>  ' + val.categoryName + '</p>');
+                    $('#form_chooseCategory, #form_chooseCategory2').append('<option data-id="' + val.categoryId + '">' + val.categoryName + '</option>');
                 });
             }
         });
-
     }
 
 //  Удаление категории
@@ -392,7 +460,8 @@ $(document).ready(function () {
             data: {categoryId: categoryId},
             url: "/web/app_dev.php/deleteCategory",
             success: function (msg) {
-                stringCategory.remove();
+                //stringCategory.remove();
+                showListCategory();
                 //console.log(memberId);
             }
         });
@@ -403,6 +472,7 @@ $(document).ready(function () {
     $('.categoryList').on("click", " .changeCategory", function (event) {
         $('.formChangeCategory, .shirm').fadeToggle("slow");
         var categoryId = $(event.target).closest('button.changeCategory').data('id');
+        prevSpamming('.changeCategory',2000);
         //console.log($(event.target).closest('button.changeCategory'));
         $.ajax({
             type: "POST",
@@ -413,6 +483,7 @@ $(document).ready(function () {
                 $('#form_changeCategory').val(jQuery.parseJSON(msg)[0].categoryName);
                 $('#form_typechangeCategory').val(jQuery.parseJSON(msg)[0].categoryType);
                 $('.agreeChangeCategory').on("click", function () {
+                    prevSpamming('.agreeChangeCategory',2000);
                     var categoryName = $('#form_changeCategory').val();
                     var categoryType = $('#form_typechangeCategory').val();
                     var memberId = getCookie('memberId');
@@ -432,12 +503,46 @@ $(document).ready(function () {
                                 $('.formChangeCategory,.shirm')
                                     .fadeToggle("slow");
                                 showListCategory();
+                                showListTransaction();
                             } else {
                                 alert('Некорректные данные!');
                             }
                         }
                     });
                 });
+            }
+        });
+    });
+    //$(document).on("click", function(event){console.log(); });
+    //  Добавляем новую транзакцию
+    $('.agreeTransaction').on("click", function (event) {
+        prevSpamming('.agreeTransaction',1500); // Предотвращаем множественные нажатия
+        var categoryId = $('.transSelect option:selected ').data('id');
+        var typeId= $('.transSelect2 option:selected ').data('id');
+        var type = $('transSelect').data('type');
+        var sum = $('#form_chooseSum').val();
+        var date = $('#datepickerTransaction').val();
+
+        var arr = $('.chooseMember').val().split(/=/);
+        var params={};
+        params[arr[0]] = arr[1];
+    //
+        $.ajax({
+            type: "POST",
+            url: "/web/app_dev.php/newTransaction",
+            data: {
+                categoryId: categoryId,
+                typeId: typeId,
+                //typeName: typeName,
+                sum: sum,
+                date: date
+            },
+            success: function (msg) {
+                if(msg == 'Ok!'){
+                    showListTransaction()
+                }else{
+                    alert('Некорректные данные!');
+                }
             }
         });
     });
@@ -454,13 +559,35 @@ $(document).ready(function () {
             },
             success: function (msg) {
                 if (msg) {
-                    if(msg)jQuery.parseJSON(msg).forEach(function (val, i) {
+                    if(msg !== 'Bad!')jQuery.parseJSON(msg).forEach(function (val, i) {
                         //console.log(val.date.date);
-                        $('#transactionBody').append('<tr class="' + val.transactionType + '" data-id="' + val.memberId + '"><td class="tdName">' + val.transactionName + '</td><td class="tdSum">' + val.sum + '</td><td class="tdDate">' + val.date.date.substring(10, -10) + '</td><td class="tdButton"><button data-id="' + val.transactionId + '" class="changeTransaction"><img class="buttons" src="/web/images/Pencil-24.png"></button></td><td class="tdButton"><button data-id="' + val.transactionId + '" class="deleteTransaction"><img class="buttons" src="/web/images/Delete-24.png"></button></td></tr>');
+                        $('#transactionBody').append(
+                            '<tr class="' + val.type + '" data-id="' + val.transactionId + '">' +
+                                '<td align="center" class="tdName">' + val.typeName + '</td>' +
+                                '<td align="center" class="tdName">' + val.categoryName + '</td>' +
+                                '<td align="center" class="tdSum">' + val.sum + ' руб</td>' +
+                                '<td class="tdDate">' + val.date.date.substring(10, -10) + '</td>' +
+                                '<td align="center" class="tdName">' + val.name + '</td>' +
+                                '<td class="tdButton">' +
+                                    '<button data-id="' + val.transactionId + '" class="changeTransaction">' +
+                                    '<img   class="buttons" src="/web/images/Pencil-24.png">' +
+                                    '</button>' +
+                                '</td>' +
+                                '<td class="tdButton">' +
+                                    '<button data-id="' + val.transactionId + '" class="deleteTransaction">' +
+                                    '<img   class="buttons" src="/web/images/Delete-24.png">' +
+                                    '</button>' +
+                                '</td>' +
+                            '</tr>'
+                        );
                     });
                     //$('.transactionList').fadeToggle("slow").toggleClass("hide");
                 } else {
-                    $('#transactionBody').append('<tr><td>У пользователя пока нет записей.</td><td></td><td></td><td></td><td></td></tr>');
+                    $('#transactionBody').append(
+                        '<div class="noTransactions">' +
+                            'У пользователя пока нет записей.' +
+                        '</div>'
+                    );
                 }
             }
         });
@@ -499,6 +626,7 @@ $(document).ready(function () {
         //$('.formChangeTransaction').toggleClass("hide");
         //$('.shirm').toggleClass("hide");
         var transactionId = $(event.target).closest('button.changeTransaction').data('id');
+        prevSpamming('.changeTransaction',2000);
         //var stringCategory = $(event.target).closest('p');
         //console.log($(event.target).closest('button.changeTransaction'));
         $.ajax({
@@ -508,15 +636,17 @@ $(document).ready(function () {
             success: function (msg) {
                 //console.log(jQuery.parseJSON(msg)[0]);
                 jQuery.parseJSON(msg).forEach(function (val, i) {
-                    $('#form_changeTransaction').val(val.transactionName);
-                    $('#form_typechangeTransaction').val(val.transactionType);
+                    $('#form_chooseCategory2').val(val.categoryName);
+                    $('#form_chooseType2').val(val.typeName);
                     $('#form_sumchangeTransaction').val(val.sum);
                     $('#datepickerchangeTransaction').val(val.date.date.substring(10, -10));
                     var memberId = val.memberId;
 
                     $('.agreeChangeTransaction').on("click", function () {
-                        var transactionName = $('#form_changeTransaction').val();
-                        var transactionType = $('#form_typechangeTransaction').val();
+                        prevSpamming('.agreeChangeTransaction',2000);
+                        var categoryId = $('#form_chooseCategory2 option:selected ').data('id');
+                        var typeId = $('#form_chooseType2 option:selected ').data('id');
+                        var memberId = val.memberId;
                         var sum = $('#form_sumchangeTransaction').val();
                         var date = $('#datepickerchangeTransaction').val();
                         //var memberId = getCookie('memberId');
@@ -525,10 +655,10 @@ $(document).ready(function () {
                             type: "POST",
                             url: "/web/app_dev.php/changeTransaction",
                             data: {
-                                memberId: memberId,
                                 transactionId: transactionId,
-                                transactionName: transactionName,
-                                transactionType: transactionType,
+                                categoryId: categoryId,
+                                typeId: typeId,
+                                memberId: memberId,
                                 sum: sum,
                                 date: date
                             },
@@ -580,87 +710,117 @@ $(document).ready(function () {
         });
     });
 
-    var data1=[];
+
     var data2=[];
     var data3=[];
+    var data4=[];
     var headerPieChart='';
     var container='';
 
-//  Получаем первый отчет за все время
-    $('.agreeReport1').on("click", function () {
-        var target = $('.chooseMember1 option:selected').text();
+$('.agreeReport1').on("click", function () {
+    prevSpamming('.agreeReport1',2000);
+    report1();
+});
+//  Получаем первый Отчет. Отчет составлен за все время
+    function report1(){
+        var data1=[];
 
-        var arr = $('.chooseMember1').val().split(/=/);
-        var params={};
-        params[arr[0]] = arr[1];
+            var target = $('.chooseMember1 option:selected').text();
 
-        $.ajax({
-            type: "POST",
-            data: params,
-            url: "/web/app_dev.php/summ",
-            success: function (msg) {
-                //console.log(msg,target);
-                val = jQuery.parseJSON(msg);
-                $('#showWastage1').val(val.summWastage);
-                $('#showProfit1').val(val.summProfit);
-                $('#showEqual1').val(val.equal);
-                //  Строим график
-                headerPieChart = 'Суммарный отчет для "'+target+'"';
-                container = '#container1';
-                data1 = [{
-                    name: 'Расходы',
-                    y: val.summWastage,
-                    color:'lightcoral'
-                },{
-                    name: 'Дохды',
-                    y: val.summProfit,
-                    color:'lightgreen'
-                }];
-                //data1.push(data1);
-                go(container,headerPieChart,data1);
+            if($('.chooseMember1').val()) var arr = $('.chooseMember1').val().split(/=/);
+            var params={};
+            if(arr){
+                params[arr[0]] = arr[1];
+            }else{
+                params['familyId']=getCookie('familyId')
+                target = 'Семьи';
             }
-        });
-    });
+
+            $.ajax({
+                type: "POST",
+                data: params,
+                url: "/web/app_dev.php/summ",
+                success: function (msg) {
+                    //console.log(msg,target);
+                    val = jQuery.parseJSON(msg);
+                    if(val.equal || val.summProfitForDates || val.summWastageForDates) {
+                        $('#showWastage1').val(val.summWastage);
+                        $('#showProfit1').val(val.summProfit);
+                        $('#showEqual1').val(val.equal);
+                        //  Строим график
+                        headerPieChart = 'Суммарный отчет для "'+target+'"';
+                        container = '#container1';
+                        data1 = [{
+                            name: 'Расходы',
+                            y: val.summWastage,
+                            color:'lightcoral'
+                        },{
+                            name: 'Дохды',
+                            y: val.summProfit,
+                            color:'lightgreen'
+                        }];
+                        //data1.push(data1);
+                        go(container,headerPieChart,data1);
+                    }
+                }
+            });
+        //});
+    }
 
 
 //  Получаем второй отчет за промежуток времени указанный пользователем
     $('.agreeReport2').on("click", function () {
+        prevSpamming('.agreeReport2',2000);
         var arr = $('.chooseMember2').val().split(/=/);
         var params={};
         params[arr[0]] = arr[1];
         params['dateFrom'] = $('#from').val();
         params['dateTo'] = $('#to').val();
         var target = $('.chooseMember2 option:selected').text();
-        console.log(params);
+        //console.log(params);
         $.ajax({
             type: "POST",
             data: params,
             url: "/web/app_dev.php/summForDates",
             success: function (msg) {
                 val = jQuery.parseJSON(msg);
-                $('#showWastage2').val(val.summWastageForDates);
-                $('#showProfit2').val(val.summProfitForDates);
-                $('#showEqual2').val(val.equal);
-                //  Строим график
-                headerPieChart = 'Суммарный отчет для "'+target+'" c '+params.dateFrom+' по '+params.dateTo;
-                container = '#container2';
-                data2 = [{
-                    name: 'Расходы',
-                    y: val.summWastageForDates,
-                    color:'lightcoral'
-                },{
-                    name: 'Дохды',
-                    y: val.summProfitForDates,
-                    color:'lightgreen'
-                }];
-                //data1.push(data1);
-                go(container,headerPieChart,data2);
+                if(val.equal || val.summProfitForDates || val.summWastageForDates){
+                    $('#showWastage2').val(val.summWastageForDates);
+                    $('#showProfit2').val(val.summProfitForDates);
+                    $('#showEqual2').val(val.equal);
+                    //  Строим график
+                    headerPieChart = 'Суммарный отчет для "'+target+'" c '+params.dateFrom+' по '+params.dateTo;
+                    container = '#container2';
+                    data2 = [{
+                        name: 'Расходы',
+                        y: val.summWastageForDates,
+                        color:'lightcoral'
+                    },{
+                        name: 'Дохды',
+                        y: val.summProfitForDates,
+                        color:'lightgreen'
+                    }];
+                    //data1.push(data1);
+                    go(container,headerPieChart,data2);
+
+                    //  Скроллим вниз
+                    //Обработка нажатия на кнопку "Вниз"
+                    //$("#down").click(function(){
+                    //Необходимо прокрутить в конец страницы
+                        var curPos=$(document).scrollTop();
+                        var height=$("body").height();
+                        var scrollTime=(height-curPos)/1.73;
+                        $("body,html").animate({"scrollTop":height},scrollTime);
+                    //});
+                //});
+                }else{ alert('Данных нет. Удостоверьтесь, что вы выбрали дату!');}
             }
         });
     });
 
 //  Получаем третий отчет за каждый день указанного промежутка времени
     $('.agreeReport3').on("click", function () {
+        prevSpamming('.agreeReport3',2000);
         var arr = $('.chooseMember3').val().split(/=/);
         var params={};
         params[arr[0]] = arr[1];
@@ -687,32 +847,58 @@ $(document).ready(function () {
 
     //  Создание круговой диаграммы из выбранных категорий.
     // Отображает отношение бюджета между выбранными категориями
-    $('.categoryList ').on("click"," .wastage, .profit", function(event){
+    $('.categoryList ').on("click"," .diagramCategory", function(event){
         //var categoryName = $(event.target).each(function(i,val){console.log(val);});
+        var categoryId = $(event.target).closest("p").data('id');
         var categoryName = $(event.target).closest("p").attr('data-categoryname');
-        var transactionType = $(event.target).closest("p").attr('data-categoryType');
-        //console.log(categoryName,transactionType);
+        //console.log(categoryId);
         $.ajax({
             type: "POST",
-            data: {categoryName:categoryName,transactionType:transactionType},
+            data: {categoryId:categoryId,categoryName:categoryName},
             url: "/web/app_dev.php/summByCategory",
             success: function (msg) {
                 val = jQuery.parseJSON(msg);
-                if(val.type == 'wastage'){ color='lightcoral'}else{ color='lightgreen'}
-                headerPieChart = 'Сравнение категорий';
-                container = '#container3';
-                item = {
-                    name: val.name,
-                    y: val.y,
-                    color:color
-                };
-                data3.push(item);
-                go(container,headerPieChart,data3);
+                if(val.y){
+                    headerPieChart = 'Сравнение категорий';
+                    container = '#container3';
+                    item = {
+                        name: val.name+'='+val.y+', руб',
+                        y: val.y
+                    };
+                    data3.push(item);
+                    go(container,headerPieChart,data3);
+                }
             }
         });
     });
-
-
+    //$(document).on('click',function(event){
+    //    console.log($(event.target));
+    //});
+    //  Создание круговой диаграммы из выбранных типов транзакции.
+    $('.type ').on("click",".diagramTransactionType", function(event){
+        //var categoryName = $(event.target).each(function(i,val){console.log(val);});
+        var typeId = $(event.target).closest("p").data('id');
+        var typeName = $(event.target).closest("p").attr('data-typename');
+        //console.log($(event.target));
+        $.ajax({
+            type: "POST",
+            data: {typeId:typeId,typeName:typeName},
+            url: "/web/app_dev.php/summByType",
+            success: function (msg) {
+                val = jQuery.parseJSON(msg);
+                if(val.y){
+                    headerPieChart = 'Сравнение по типам';
+                    container = '#container4';
+                    item = {
+                        name: val.name+'='+val.y+', руб',
+                        y: val.y
+                    };
+                    data4.push(item);
+                    go(container,headerPieChart,data4);
+                }
+            }
+        });
+    });
 
 
     //  Функция создания круговых диаграм Highcharts.com (c)
@@ -743,11 +929,12 @@ $(document).ready(function () {
                     }
                 },
                 series: [{
-                    name: 'Brands',
+                    name: 'В процентах',
                     colorByPoint: true,
                     data: data
                 }]
             });
+        $('.highcharts-button').fadeOut();
     }
     $('.family').on("click", function(){$('.familyList').fadeToggle('slow')});
 
