@@ -267,36 +267,38 @@ $(document).ready(function () {
                     $('#form_login5').val(val.login);
                     $('#form_password5').val(null);
                 });
-
-                $('.agreeChangeMember').one("click", function () {
-                    prevSpamming('.agreeChangeMember', 2000);
-                    surname = $('#form_surname5').val();
-                    name = $('#form_name5').val();
-                    secondname = $('#form_secondname5').val();
-                    password = $('#form_password5').val();
-                    login = $('#form_login5').val();
-                    $.ajax({
-                        type: "POST",
-                        data: {
-                            memberId: memberId,
-                            name: name,
-                            surname: surname,
-                            secondname: secondname,
-                            login: login,
-                            password: password
-                        },
-                        url: "/web/app_dev.php/changeMember",
-                        success: function (msg) {
-                            if (msg == 'Ok!') {
-                                showListMember();
-                                showListTransaction();
-                                $('.changeMember, .shirm').fadeToggle('slow');
-                            } else {
-                                alert('Некорректные данные!');
+                agreeChangeMember();
+                function agreeChangeMember(){
+                    $('.agreeChangeMember').one("click", function () {
+                        surname = $('#form_surname5').val();
+                        name = $('#form_name5').val();
+                        secondname = $('#form_secondname5').val();
+                        password = $('#form_password5').val();
+                        login = $('#form_login5').val();
+                        $.ajax({
+                            type: "POST",
+                            data: {
+                                memberId: memberId,
+                                name: name,
+                                surname: surname,
+                                secondname: secondname,
+                                login: login,
+                                password: password
+                            },
+                            url: "/web/app_dev.php/changeMember",
+                            success: function (msg) {
+                                if (msg == 'Ok!') {
+                                    showListMember();
+                                    showListTransaction();
+                                    $('.changeMember, .shirm').fadeToggle('slow');
+                                } else {
+                                    alert('Некорректные данные!');
+                                    agreeChangeMember()
+                                }
                             }
-                        }
+                        });
                     });
-                });
+                }
             }
         });
 
@@ -382,30 +384,34 @@ $(document).ready(function () {
                     $('#form_changeType').val("false");
                 }
 
-                $('.agreeChangeType').one("click", function () {
-                    prevSpamming('.agreeChangeType', 2000);
-                    var typeName = $('#form_changeTypeName').val();
-                    var type = $('#form_changeType').val();
-                    $.ajax({
-                        type: "POST",
-                        url: "/web/app_dev.php/changeTransactionType",
-                        data: {
-                            typeName: typeName,
-                            type: type,
-                            typeId: typeId
-                        },
-                        success: function (msg) {
-                            if (msg == 'Ok!') {
-                                $('.formChangeType,.shirm')
-                                    .fadeToggle("slow");
-                                showlistTransactionType();
-                                showListTransaction();
-                            } else {
-                                alert('Некорректные данные!');
+                agreeChangeType();
+                function agreeChangeType(){
+                    $('.agreeChangeType').one("click", function () {
+                        prevSpamming('.agreeChangeType', 2000);
+                        var typeName = $('#form_changeTypeName').val();
+                        var type = $('#form_changeType').val();
+                        $.ajax({
+                            type: "POST",
+                            url: "/web/app_dev.php/changeTransactionType",
+                            data: {
+                                typeName: typeName,
+                                type: type,
+                                typeId: typeId
+                            },
+                            success: function (msg) {
+                                if (msg == 'Ok!') {
+                                    $('.formChangeType,.shirm')
+                                        .fadeToggle("slow");
+                                    showlistTransactionType();
+                                    showListTransaction();
+                                } else {
+                                    alert('Некорректные данные!');
+                                    agreeChangeType();
+                                }
                             }
-                        }
+                        });
                     });
-                });
+                }
             }
         });
     });
@@ -481,34 +487,39 @@ $(document).ready(function () {
 
                 $('#form_changeCategory').val(jQuery.parseJSON(msg)[0].categoryName);
                 $('#form_typechangeCategory').val(jQuery.parseJSON(msg)[0].categoryType);
-                $('.agreeChangeCategory').one("click", function () {
-                    prevSpamming('.agreeChangeCategory', 2000);
-                    var categoryName = $('#form_changeCategory').val();
-                    var categoryType = $('#form_typechangeCategory').val();
-                    var memberId = getCookie('memberId');
-                    var familyId = getCookie('familyId');
-                    $.ajax({
-                        type: "POST",
-                        url: "/web/app_dev.php/changeCategory",
-                        data: {
-                            categoryName: categoryName,
-                            categoryType: categoryType,
-                            memberId: memberId,
-                            familyId: familyId,
-                            categoryId: categoryId
-                        },
-                        success: function (msg) {
-                            if (msg == 'Ok!') {
-                                $('.formChangeCategory,.shirm')
-                                    .fadeToggle("slow");
-                                showListCategory();
-                                showListTransaction();
-                            } else {
-                                alert('Некорректные данные!');
+
+                agreeChangeCategory();
+                function agreeChangeCategory(){
+                    $('.agreeChangeCategory').one("click", function () {
+                        prevSpamming('.agreeChangeCategory', 2000);
+                        var categoryName = $('#form_changeCategory').val();
+                        var categoryType = $('#form_typechangeCategory').val();
+                        var memberId = getCookie('memberId');
+                        var familyId = getCookie('familyId');
+                        $.ajax({
+                            type: "POST",
+                            url: "/web/app_dev.php/changeCategory",
+                            data: {
+                                categoryName: categoryName,
+                                categoryType: categoryType,
+                                memberId: memberId,
+                                familyId: familyId,
+                                categoryId: categoryId
+                            },
+                            success: function (msg) {
+                                if (msg == 'Ok!') {
+                                    $('.formChangeCategory,.shirm')
+                                        .fadeToggle("slow");
+                                    showListCategory();
+                                    showListTransaction();
+                                } else {
+                                    alert('Некорректные данные!');
+                                    agreeChangeCategory();
+                                }
                             }
-                        }
+                        });
                     });
-                });
+                }
             }
         });
     });
@@ -655,37 +666,42 @@ $(document).ready(function () {
                     $('#datepickerchangeTransaction').val(val.date.date.substring(10, -10));
                     var memberId = val.memberId;
 
-                    $('.agreeChangeTransaction').one("click", function () {
-                        prevSpamming('.agreeChangeTransaction', 2000);
-                        var categoryId = $('#form_chooseCategory2 option:selected ').data('id');
-                        var typeId = $('#form_chooseType2 option:selected ').data('id');
-                        var memberId = val.memberId;
-                        var sum = $('#form_sumchangeTransaction').val();
-                        var date = $('#datepickerchangeTransaction').val();
+                    agreeChangeTransaction();
+                    function agreeChangeTransaction(){
+                        $('.agreeChangeTransaction').one("click", function () {
+                            prevSpamming('.agreeChangeTransaction', 2000);
+                            var categoryId = $('#form_chooseCategory2 option:selected ').data('id');
+                            var typeId = $('#form_chooseType2 option:selected ').data('id');
+                            var memberId = val.memberId;
+                            var sum = $('#form_sumchangeTransaction').val();
+                            var date = $('#datepickerchangeTransaction').val();
 
-                        $.ajax({
-                            type: "POST",
-                            url: "/web/app_dev.php/changeTransaction",
-                            data: {
-                                transactionId: transactionId,
-                                categoryId: categoryId,
-                                typeId: typeId,
-                                memberId: memberId,
-                                sum: sum,
-                                date: date
-                            },
-                            success: function (msg) {
-                                if (msg == 'Ok!') {
-                                    $('.formChangeTransaction, .shirm')
-                                        .fadeToggle("slow");
-                                    //.toggleClass("hide");
-                                    showListTransaction();
-                                } else {
-                                    alert('Некорректные данные!');
+                            $.ajax({
+                                type: "POST",
+                                url: "/web/app_dev.php/changeTransaction",
+                                data: {
+                                    transactionId: transactionId,
+                                    categoryId: categoryId,
+                                    typeId: typeId,
+                                    memberId: memberId,
+                                    sum: sum,
+                                    date: date
+                                },
+                                success: function (msg) {
+                                    if (msg == 'Ok!') {
+                                        $('.formChangeTransaction, .shirm')
+                                            .fadeToggle("slow");
+                                        //.toggleClass("hide");
+                                        showListTransaction();
+                                    } else {
+                                        alert('Некорректные данные!');
+                                        agreeChangeTransaction();
+                                    }
                                 }
-                            }
+                            });
                         });
-                    });
+                    }
+
                 });
 
             }
